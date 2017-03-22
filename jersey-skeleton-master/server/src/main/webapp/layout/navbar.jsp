@@ -3,11 +3,10 @@
     <ul class="nav navbar-nav">
       <li><a href="/">Javascript (Single Page Application)</a></li>
       <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">MVC Template (jsp)<span class="caret"></span></a>
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Liste<span class="caret"></span></a>
         <ul class="dropdown-menu">
           <li><a href="/html/user">Liste des "User"</a></li>
-          <li><a href="/html/secure">Liste s&eacute;curis&eacute;e</a></li>
-          <li><a id="login" href="/html/login">Login</a></li>
+          <li><a href="/html/parcours">Liste des parcours</a></li>
         </ul>
       </li>
     </ul>

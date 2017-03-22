@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -70,7 +71,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         verifyAllPermissions();
-
+        askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions(new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -278,7 +282,9 @@ public class MainActivity extends AppCompatActivity
                 break;
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
                 int writeGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
                 if (writeGranted != PackageManager.PERMISSION_GRANTED) {
+                    Log.i(LOG,"permission = " + writeGranted);
                     if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                         showExplanation(activity, "External sdcard access permission request", "We need to save the maps to your device", Manifest.permission
                                 .WRITE_EXTERNAL_STORAGE, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);

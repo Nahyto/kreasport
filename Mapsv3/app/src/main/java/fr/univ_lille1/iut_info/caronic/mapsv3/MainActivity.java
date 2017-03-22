@@ -205,6 +205,7 @@ public class MainActivity extends AppCompatActivity
 //                    askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                     List<Integer> permissionsToRequest = new ArrayList<>();
                     permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                     fragment = PermissionsFragment.newInstance(permissionsToRequest);
                 }
                 fab.hide();

@@ -49,9 +49,14 @@ public class PermissionsFragment extends Fragment {
         List<PermissionsRequestModel> permissionsList = new ArrayList<>();
 
         for (Integer perm : permisisonsIntList) {
+            PermissionsRequestModel model;
             switch (perm) {
                 case MainActivity.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
-                    PermissionsRequestModel model = new PermissionsRequestModel("Request write permission", MainActivity.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    model = new PermissionsRequestModel("Request write external storage", MainActivity.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    permissionsList.add(model);
+                    break;
+                case MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                    model = new PermissionsRequestModel("Request access fine location", MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                     permissionsList.add(model);
                     break;
                 default:

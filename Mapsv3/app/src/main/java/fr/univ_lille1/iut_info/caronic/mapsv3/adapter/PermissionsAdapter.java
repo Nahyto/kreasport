@@ -66,6 +66,14 @@ public class PermissionsAdapter extends BaseAdapter implements ListAdapter {
                     }
                 });
                 break;
+            case MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                bt.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MainActivity.askSpecificPermission(activity, MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    }
+                });
+                break;
             default:
                 break;
         }

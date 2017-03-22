@@ -1,0 +1,432 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"in",
+				"indiceTroisiemeMot"
+			],
+			[
+				"l",
+				"li\tTag"
+			],
+			[
+				"e",
+				"echo"
+			],
+			[
+				"b",
+				"body\tTag"
+			],
+			[
+				"te",
+				"text-decoration-style"
+			],
+			[
+				"margin",
+				"margin-top"
+			],
+			[
+				"mar",
+				"margin-bottom"
+			],
+			[
+				"ma",
+				"margin-bottom"
+			],
+			[
+				"padd",
+				"padding-left"
+			],
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"wh",
+				"width"
+			],
+			[
+				"si",
+				"font-size"
+			],
+			[
+				"creature",
+				"creatures"
+			],
+			[
+				"cat",
+				"creatures"
+			],
+			[
+				"ti",
+				"title\tTag"
+			],
+			[
+				"pi",
+				"pid_t"
+			],
+			[
+				"socket",
+				"socket_client"
+			],
+			[
+				"pa",
+				"padding-bottom"
+			],
+			[
+				"tex",
+				"text-align"
+			],
+			[
+				"dra",
+				"drawCell"
+			],
+			[
+				"nb",
+				"nbCol"
+			],
+			[
+				"m",
+				"message"
+			],
+			[
+				"s",
+				"socket_client"
+			],
+			[
+				"c",
+				"char"
+			],
+			[
+				"sock",
+				"socket_client"
+			],
+			[
+				"acc",
+				"accepter_client"
+			],
+			[
+				"so",
+				"socket_serveur"
+			],
+			[
+				"di",
+				"div\tTag"
+			],
+			[
+				"fo",
+				"footer\tTag"
+			],
+			[
+				"paddi",
+				"padding-left"
+			],
+			[
+				"ba",
+				"background-color"
+			],
+			[
+				"text-",
+				"text-align"
+			],
+			[
+				"u",
+				"ul\tTag"
+			],
+			[
+				"h",
+				"h2\tTag"
+			],
+			[
+				"inc",
+				"include"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 392.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/README.md",
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/server/src/main/java/fr/iutinfo/skeleton/api/SecureResource.java",
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/server/src/main/java/fr/iutinfo/skeleton/api/BDDFactory.java",
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/server/src/main/webapp/fr/iutinfo/skeleton/web/SecureViews/index.jsp",
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/server/src/main/java/fr/iutinfo/skeleton/auth/AppSecurityContext.java",
+		"/home/gaut-vador/Documents/Cours_S4/krea-sport-project/jersey-skeleton-master/server/src/main/java/fr/iutinfo/skeleton/api/Api.java",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/main.c",
+		"/home/gaut-vador/Téléchargements/Pirlet_Germe_Projet-CusCrypt/lancement.sh",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/fonction.c",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/socket.c",
+		"/home/gaut-vador/Documents/Divers/poursuite_d'etude/code_dossier",
+		"/home/gaut-vador/.bashrc",
+		"/home/gaut-vador/Téléchargements/Pirlet_Germe_Projet-CusCrypt/webapps/CusCrypt/src/web/servlet/ServletSingUp.java",
+		"/home/gaut-vador/Téléchargements/Pirlet_Germe_Projet-CusCrypt/webapps/CusCrypt/src/web/struct/MyBDD.java",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/new.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/data/pubKey.rsa",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/login.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/CusCrypt/login.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/CusCrypt/saisie.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/saisie.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/modifProfil.jsp",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/CusCrypt/menu.jsp",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/menu.jsp",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/CusCrypt/menu.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/menu.html",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/README.md",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/header.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/fonction.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/socket.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/tmp.c",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/tmp.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/reponses.txt",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/fonctions.c",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/fonctions.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/Makefile",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/webserver/Custer",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/m4101c.pdf",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/LICENSE",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/custer.png",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/Custer/AUTHORS",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/CusCrypt/comp.sh",
+		"/home/gaut-vador/Documents/Divers/TrisMusique.sh",
+		"/home/gaut-vador/Documents/Divers/Magic/creature.sh",
+		"/home/gaut-vador/Documents/Divers/Magic/enchantement.sh",
+		"/home/gaut-vador/Documents/Divers/Magic/Style.css",
+		"/home/gaut-vador/Documents/Secu/script",
+		"/home/gaut-vador/Documents/Secu/medium/dico",
+		"/home/gaut-vador/Documents/Secu/medium/script",
+		"/home/gaut-vador/Documents/Secu/medium/main.c",
+		"/home/gaut-vador/Documents/Secu/medium/fonctions.c",
+		"/home/gaut-vador/Documents/Secu/medium/Makefile",
+		"/home/gaut-vador/Documents/Secu/medium/fonctions.h",
+		"/home/gaut-vador/Documents/Secu/medium/header.h",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/fonction.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/WC/fonction.h",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/WC/main.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/main.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/fonction.h",
+		"/home/gaut-vador/Documents/Divers/Magic/creatures/Robin.html",
+		"/home/gaut-vador/Documents/Divers/Magic/creatures/Carle.html",
+		"/home/gaut-vador/Documents/Divers/Magic/creatures/creatures.html",
+		"/home/gaut-vador/Documents/Divers/Magic/index.html",
+		"/home/gaut-vador/Documents/Divers/Magic/creatures.html",
+		"/home/gaut-vador/Documents/Divers/Magic/enchantements.html",
+		"/home/gaut-vador/Documents/Programmation/HTML/Style.css",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/css/style.css",
+		"/home/gaut-vador/Documents/Programmation/HTML/PenseBete.html",
+		"/home/gaut-vador/Documents/Secu/reponse",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/Trucs a faire.txt",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/README.md",
+		"/home/gaut-vador/Documents/Secu/reponses",
+		"/media/gaut-vador/Seagate Expansion Drive/bonjour/script",
+		"/media/gaut-vador/Seagate Expansion Drive/bonjour/script2",
+		"/media/gaut-vador/Seagate Expansion Drive/bonjour/crypt",
+		"/home/gaut-vador/Documents/Cours_S4/JavaScript/TP3/jquery.html",
+		"/home/gaut-vador/Documents/Cours_S4/JavaScript/TP3/tp3.html",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/modif_BMP/struc.h",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/modif_BMP/fonctions.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/modif_BMP/main.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/modif_BMP/main.c~",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/WC/fonction.c",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/webserver/socket.c",
+		"/media/gaut-vador/4C93-0642/HTML/Exo CV/cvcss.css",
+		"/media/gaut-vador/4C93-0642/HTML/Exo CV/devoircv.html",
+		"/media/gaut-vador/4C93-0642/HTML/Fluttershy/Style.css",
+		"/home/gaut-vador/Documents/Cours_S4/JavaScript/TP2/chess.js",
+		"/home/gaut-vador/Documents/Cours_S4/JavaScript/TP2/chess.html",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Projet/0.6_JangoFett/PacMan.html",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Projet/0.6_JangoFett/0.6.js",
+		"/home/gaut-vador/Documents/Cours_S4/JavaScript/TP2/tp2/tp2/tp2.html",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/reponses.txt",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/webserver/header.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/webserver/socket.h",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/webserver/main.c",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/AUTHORS",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/Makefile",
+		"/home/gaut-vador/Documents/Cours_S4/Systeme/ProgSyServ/webserver/Makefile",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/Makefile",
+		"/home/gaut-vador/Documents/Programmation/HTML/Devoir Mina/StyleDevoir.css",
+		"/home/gaut-vador/Documents/Programmation/HTML/Devoir Mina/Devoir.html",
+		"/home/gaut-vador/Programs Files/apache-tomcat-8.5.11/webapps/Meet-N-Roll/comp.sh",
+		"/etc/default/tomcat8",
+		"/home/gaut-vador/Documents/Programmation/HTML/Devoir Mina/index.html",
+		"/home/gaut-vador/Documents/Programmation/HTML/test.html",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Activités/Activité 2/Rendu/page_d'accueil.html",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Activités/Activite 3/images.html",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Activités/Activite 3/Rendu/styleCSS1.css",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/Activités/Activité 2/Rendu/Style.css",
+		"/home/gaut-vador/Documents/Programmation/JavaScript/ISN/css/styleISN.css",
+		"/home/gaut-vador/Documents/Programmation/HTML/testCSS.css",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/header.h",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/fonctions.c",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/ligne_commande.o",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/.gitignore",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/user.name",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/config",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/.git/config",
+		"/home/gaut-vador/Documents/Cours_S3/Systeme/Shell/Gaut-vador",
+		"/etc/gitconfig",
+		"/home/gaut-vador/Documents/Programmation/C/Plus_ou_ moins/jeu.c",
+		"/home/gaut-vador/Documents/Programmation/C/Plus_ou_ moins/jeu.h",
+		"/home/gaut-vador/Documents/Programmation/C/Plus_ou_ moins/menu.h",
+		"/home/gaut-vador/Documents/Programmation/C/Plus_ou_ moins/menu.c",
+		"/home/gaut-vador/Documents/Programmation/C/Plus_ou_ moins/main.c"
+	],
+	"find":
+	{
+		"height": 22.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"dl",
+			"gfx",
+			"euxieme"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"ul"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "BDDFactory.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 145.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

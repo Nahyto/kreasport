@@ -1,7 +1,6 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.app.Activity;
-import android.content.res.*;
 
 import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;

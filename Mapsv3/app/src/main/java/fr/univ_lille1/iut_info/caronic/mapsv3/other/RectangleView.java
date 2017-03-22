@@ -2,13 +2,9 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
-
-import static android.R.attr.x;
-import static android.R.attr.y;
 
 /**
  * Created by Master on 16/03/2017.

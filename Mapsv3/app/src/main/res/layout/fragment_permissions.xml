@@ -5,6 +5,7 @@
     tools:context=".main.fragments.PermissionsFragment">
 
     <RelativeLayout
+        android:id="@+id/fragment_permissions_relative_layout"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
@@ -25,6 +26,14 @@
             android:text="@string/fragment_permissions_sub_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+        <ListView
+            android:id="@+id/fragment_permissions_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/secondary_text" />
     </RelativeLayout>
 
 </FrameLayout>

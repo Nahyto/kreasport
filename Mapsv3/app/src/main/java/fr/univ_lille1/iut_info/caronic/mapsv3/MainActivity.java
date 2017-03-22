@@ -5,10 +5,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,7 +26,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity
 
     private final static String TAG_FEED = "FEED";
     private final static String TAG_EXPLORE = "EXPLORE";
+    private final static String TAG_PERMISSIONS_FRAG = "permissions_frag";
 
     private Fragment feedFragment;
     private Fragment osmFragment;
@@ -71,10 +72,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         verifyAllPermissions();
-        askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            requestPermissions(new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -185,8 +182,10 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_explore:
                 currentID = R.id.nav_explore;
-                currentTag = TAG_EXPLORE;
+                Log.i(LOG, "trying to open explore fragment");
+                Log.i(LOG, "write perm = " + mWriteExternalStorageGranted);
                 if (mWriteExternalStorageGranted) {
+                    currentTag = TAG_EXPLORE;
                     fragment = osmFragment;
                     if (fragment == null) {
                         fragment = OSMFragment.newInstance(
@@ -201,9 +200,13 @@ public class MainActivity extends AppCompatActivity
                         osmFragment = fragment;
                     }
                 } else {
+                    currentTag = TAG_PERMISSIONS_FRAG;
                     // TODO add new fragment asking permissions instead of having to reset the nav drawer to the main fragment
 //                    askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                    fragment = new PermissionsFragment();
+                    List<Integer> permissionsToRequest = new ArrayList<>();
+                    permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    fragment = PermissionsFragment.newInstance(permissionsToRequest);
                 }
                 fab.hide();
                 break;
@@ -219,7 +222,7 @@ public class MainActivity extends AppCompatActivity
                 getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(R.id.content_frame, fragment)
+                        .replace(R.id.content_frame, fragment, currentTag)
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
 
@@ -230,7 +233,7 @@ public class MainActivity extends AppCompatActivity
                 getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .add(R.id.content_frame, fragment)
+                        .replace(R.id.content_frame, fragment, currentTag)
                         .addToBackStack(currentTag)
                         .commit();
 
@@ -270,6 +273,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static void askSpecificPermission(Activity activity, int permission) {
+        Log.i(LOG, "asking for permission int = " + permission);
         switch (permission) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 int fineGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -281,10 +285,10 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
+                Log.i(LOG, "checking for write permissions");
                 int writeGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                 if (writeGranted != PackageManager.PERMISSION_GRANTED) {
-                    Log.i(LOG,"permission = " + writeGranted);
                     if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                         showExplanation(activity, "External sdcard access permission request", "We need to save the maps to your device", Manifest.permission
                                 .WRITE_EXTERNAL_STORAGE, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
@@ -293,6 +297,7 @@ public class MainActivity extends AppCompatActivity
                                 PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                     }
                 } else {
+                    Log.i(LOG, "write permission already granted");
                     mWriteExternalStorageGranted = true;
                 }
                 break;

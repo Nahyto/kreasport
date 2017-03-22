@@ -26,12 +26,33 @@ function getByAnnotation() {
        beforeSend : function(req) {
         req.setRequestHeader("Authorization", "Basic " + btoa($("#userlogin").val() + ":" + $("#passwdlogin").val()));
        },
-       success: function (data) {
-        afficheUser(data);
-       },
-       error : function(jqXHR, textStatus, errorThrown) {
-       			alert('error: ' + textStatus);
-       		}
+
+       	success: function( json ) {
+      var j = JSON.parse(JSON.stringify(json));
+      var ul = $('<ul>');
+      for (var i = 0; i < j.length; i++) {
+        $('<li>['+j[i].id+'] '+j[i].title+' de '+j[i].author+'</li>').appendTo(ul);
+      };
+      var op = $("#output");
+      ul.appendTo(op);
+
+      document.location = "creation/kreasport.html";
+      
+      $( "<h1>" ).text( json.title ).appendTo( "body" );
+      $( "<div class=\"content\">").html( json.html ).appendTo( "body" );
+    },
+    // Code to run if the request fails; the raw request and
+    // status codes are passed to the function
+    error: function( xhr, status, errorThrown ) {
+        alert( "Sorry, there was a problem!" );
+        console.log( "Error: " + errorThrown );
+        console.log( "Status: " + status );
+        console.dir( xhr );
+    },
+    // Code to run regardless of success or failure
+    complete: function( xhr, status ) {
+        alert( "The request is complete!" );
+    }
      });
      } else {
      $.getJSON(url, function(data) {

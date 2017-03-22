@@ -29,7 +29,7 @@ public class Parcours implements Principal {
         this.name = name;
         this.alias = alias;
     }
-
+    //lol mdr
     public Parcours() {
     }
 

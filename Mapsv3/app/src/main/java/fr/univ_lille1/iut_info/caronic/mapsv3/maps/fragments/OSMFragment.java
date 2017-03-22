@@ -104,6 +104,12 @@ public class OSMFragment extends Fragment {
         return mMapView;
     }
 
+    public void LocationOverlay(MapView mMapView, MyLocationNewOverlay mLocationOverlay){
+        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context),mMapView);
+        this.mLocationOverlay.enableMyLocation();
+        mMapView.getOverlays().add(this.mLocationOverlay);
+    }
+
     /**
      * Basic map settings such as hw acceleration, copyright overlay...
      */

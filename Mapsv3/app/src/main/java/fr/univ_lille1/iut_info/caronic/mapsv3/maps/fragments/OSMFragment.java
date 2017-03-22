@@ -1,6 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,6 +19,9 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
@@ -26,10 +30,10 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.util.ArrayList;
+
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,6 +49,8 @@ public class OSMFragment extends Fragment {
     protected static final String KEY_MAP_OPTIONS = "map_options";
 
     private static GeoPoint initialPoint;
+    private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
+    private RotationGestureOverlay mRotationGestureOverlay;
     protected int zoom;
 
     private MapView mMapView;
@@ -96,7 +102,7 @@ public class OSMFragment extends Fragment {
         // set default location to the one specified on newInstance. Will still animate/move to last saved location after.
         // This is in case there is a delay in acquiring current/last position
         mMapView.getController().setCenter(initialPoint);
-
+        addBalises();
         basicMapSetup();
 
         goThroughOptions();
@@ -125,9 +131,32 @@ public class OSMFragment extends Fragment {
     /**
      * Enables options from {@link MapOptions}
      */
+    @SuppressWarnings({"ResourceType"})
     private void goThroughOptions() {
         if (mMapOptions != null) {
             if (mMapOptions.isEnableLocationOverlay()) {
+                LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        Toast.makeText(getContext(), "Update", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+
+                    }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+
+                    }
+                });
                 MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getContext()), mMapView);
                 mLocationOverlay.enableMyLocation();
                 mMapView.getOverlays().add(mLocationOverlay);
@@ -155,6 +184,53 @@ public class OSMFragment extends Fragment {
         }
     }
 
+    public void addBalises(){
+        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+        Context context = getActivity();
+        items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
+                9735936))); // Hannover
+        items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin
+        items.add(new OverlayItem(
+                "Washington",
+                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
+        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
+
+			/* OnTapListener for the Markers, shows a simple Toast. */
+        mMyLocationOverlay = new ItemizedOverlayWithFocus<>(items,
+                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+                    @Override
+                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
+                        Toast.makeText(
+                                getContext(),
+                                "Item '" + item.getTitle() + "' (index=" + index
+                                        + ") got single tapped up", Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onItemLongPress(final int index, final OverlayItem item) {
+                        Toast.makeText(
+                                getContext(),
+                                "Item '" + item.getTitle() + "' (index=" + index
+                                        + ") got long pressed", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+                }, context);
+        mMyLocationOverlay.setFocusItemsOnTap(true);
+        mMyLocationOverlay.setFocusedItem(0);
+        //https://github.com/osmdroid/osmdroid/issues/317
+        //you can override the drawing characteristics with this
+        mMyLocationOverlay.setMarkerBackgroundColor(Color.BLUE);
+        mMyLocationOverlay.setMarkerTitleForegroundColor(Color.WHITE);
+        mMyLocationOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
+        mMyLocationOverlay.setDescriptionBoxPadding(15);
+
+        mMapView.getOverlays().add(mMyLocationOverlay);
+
+        mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
+        mRotationGestureOverlay.setEnabled(false);
+        mMapView.getOverlays().add(mRotationGestureOverlay);
+    }
 
     @Override
     public void onSaveInstanceState(final Bundle outState) {

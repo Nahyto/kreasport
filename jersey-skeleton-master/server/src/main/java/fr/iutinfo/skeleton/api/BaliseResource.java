@@ -1,6 +1,6 @@
 package fr.iutinfo.skeleton.api;
 
-import fr.iutinfo.skeleton.common.dto.ParcoursDto;
+import fr.iutinfo.skeleton.common.dto.BaliseDto;
 import fr.iutinfo.skeleton.common.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,29 +14,32 @@ import java.util.stream.Collectors;
 import static fr.iutinfo.skeleton.api.BDDFactory.getDbi;
 import static fr.iutinfo.skeleton.api.BDDFactory.tableExist;
 
-@Path("/parcours")
+@Path("/balise")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ParcoursResource {
-    final static Logger logger = LoggerFactory.getLogger(ParcoursResource.class);
-    private static ParcoursDao dao = getDbi().open(ParcoursDao.class);
+public class BaliseResource {
+    final static Logger logger = LoggerFactory.getLogger(BaliseResource.class);
+    private static BaliseDAO dao = getDbi().open(BaliseDAO.class);
 
-    public ParcoursResource() throws SQLException {
-        if (!tableExist("parcours")) {
+    public BaliseResource() throws SQLException {
+        if (!tableExist("balise")) {
             logger.debug("Crate table parcours");
-            dao.createParcoursTable();
-            dao.insert(new Parcours(0, "Margaret Thatcher", "la Dame de fer"));
+            dao.createBaliseTable();
+            dao.insert(new Balise(0, 25.25, 15.15,0));
         }
     }
     
     public static void main(String[] args) throws SQLException {
-		ParcoursResource p = new ParcoursResource();
+    	
+		BaliseResource p = new BaliseResource();
+		dao.insert(new Balise(42,45.45,4565.545,2));
 		System.out.println(dao.all());
+		
 	}
 
     @POST
-    public ParcoursDto createParcours(ParcoursDto dto) {
-        Parcours user = new Parcours();
+    public BaliseDto createBalise(BaliseDto dto) {
+        Balise user = new Balise();
         user.initFromDto(dto);
         int id = dao.insert(user);
         dto.setId(id);
@@ -45,8 +48,8 @@ public class ParcoursResource {
 
     @GET
     @Path("/{name}")
-    public ParcoursDto getParcours(@PathParam("name") String name) {
-        Parcours user = dao.findByName(name);
+    public BaliseDto getBalise(@PathParam("name") String name) {
+        Balise user = dao.findByName(name);
         if (user == null) {
             throw new WebApplicationException(404);
         }
@@ -54,15 +57,15 @@ public class ParcoursResource {
     }
 
     @GET
-    public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {
-        List<Parcours> users;
+    public List<BaliseDto> getAllBalise(@QueryParam("q") String query) {
+        List<Balise> users;
         if (query == null) {
             users = dao.all();
         } else {
             logger.debug("Search users with query: " + query);
             users = dao.search("%" + query + "%");
         }
-        return users.stream().map(Parcours::convertToDto).collect(Collectors.toList());
+        return users.stream().map(Balise::convertToDto).collect(Collectors.toList());
     }
 
     @DELETE

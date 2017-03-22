@@ -1,16 +1,16 @@
 package fr.iutinfo.skeleton.api;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
+import java.security.Principal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import fr.iutinfo.skeleton.common.dto.ParcoursDto;
-import fr.iutinfo.skeleton.common.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.Principal;
-import java.security.SecureRandom;
+import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 
 public class Parcours implements Principal {
     final static Logger logger = LoggerFactory.getLogger(Parcours.class);
@@ -18,24 +18,58 @@ public class Parcours implements Principal {
     private String name;
     private String alias;
     private int id = 0;
+    private String balise;
 
-    public Parcours(int id, String name) {
+    public Parcours(int id, String name) throws SQLException {
         this.id = id;
         this.name = name;
     }
 
-    public Parcours(int id, String name, String alias) {
+    public Parcours(int id, String name, String alias) throws SQLException {
         this.id = id;
         this.name = name;
         this.alias = alias;
     }
-    //lol mdr
+    
+   /* public void remplirB() throws SQLException{
+    	Connection con = null;
+		try{  
+			Class.forName("org.sqlite.JDBC");
+		}catch(ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		try{
+			con = DriverManager.getConnection("jdbc:sqlite:" + System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "data.db");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		String[] liste = null;
+		ResultSet rs = null, rs1 = null;
+		try{
+			Statement statement = con.createStatement();
+			rs1 = statement.executeQuery("select * from balise where parcours = (Select id from parcours where name = "+name+");");
+				while (rs.next()) {
+					balise += rs.getString("id");
+				}
+			rs1.close();
+		}catch(SQLException e){
+			e.printStackTrace();
+		}finally{
+			con.close();
+		}
+    }*/
+    
     public Parcours() {
     }
 
- /*   public static Parcours getAnonymousUser() {
-        return anonymous;
-    }*/
+    public String getBalise(){
+    	return balise;
+    }
+    
+    public void setBalise(String b){
+    	balise += " "+b;
+    }
+    
 
 
     public int getId() {
@@ -102,13 +136,15 @@ public class Parcours implements Principal {
         this.setAlias(dto.getAlias());
         this.setId(dto.getId());
         this.setName(dto.getName());
+        this.setBalise(dto.getBalise());
     }
 
-    public UserDto convertToDto() {
-        UserDto dto = new UserDto();
+    public ParcoursDto convertToDto() {
+    	ParcoursDto dto = new ParcoursDto();
         dto.setAlias(this.getAlias());
         dto.setId(this.getId());
         dto.setName(this.getName());
+        dto.setBalise(this.getBalise());
         return dto;
     }
 }

@@ -21,6 +21,7 @@
               Id : ${it.id}<br/>
               Nom : ${it.name}<br/>
               alias : ${it.alias} <br/>
+              Balises : ${it.balise}<br/>
             </div>
           </div>
         </div>

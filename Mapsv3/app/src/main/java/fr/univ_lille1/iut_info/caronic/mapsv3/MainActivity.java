@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -36,7 +35,7 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
-import static android.R.attr.tag;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_explore;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_feed;
 
 public class MainActivity extends AppCompatActivity
@@ -53,12 +52,15 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private FloatingActionButton fab;
 
-    private final static String TAG_FEED = "FEED";
-    private final static String TAG_EXPLORE = "EXPLORE";
-    private final static String TAG_PERMISSIONS_FRAG = "permissions_frag";
+    private final static String TAG_FEED = "mapsv3.tag_feed";
+    private final static String TAG_EXPLORE = "mapsv3.tag_explore";
+    private final static String TAG_PERMISSIONS_FRAG = "mapsv3.tag_permissions";
 
-    private Fragment feedFragment;
-    private Fragment osmFragment;
+    private final static String KEY_CURRENT_TAG = "mapsv3.key_current_tag";
+
+    private Fragment storeFeedFragment;
+    private Fragment storeExploreFragment;
+    private Fragment storePermissionsFragment;
 
     /**
      * Variables to save which fragment is currently being displayed. NOT to use for switching activities.
@@ -71,7 +73,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        verifyAllPermissions();
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -94,6 +95,16 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
+
+        if (savedInstanceState != null) {
+            String oldTag = savedInstanceState.getString(KEY_CURRENT_TAG);
+            if (oldTag != null) {
+                int newId = getFragmentIDByTag(oldTag);
+                displaySelectedScreen(newId);
+            }
+        } else {
+            displaySelectedScreen(R.id.nav_feed);
+        }
 
     }
 
@@ -173,21 +184,21 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_feed:
                 currentID = R.id.nav_feed;
                 currentTag = TAG_FEED;
-                fragment = feedFragment;
+                fragment = storeFeedFragment;
                 if (fragment == null) {
+                    Log.d(LOG, "creating new blank fragment");
                     fragment = new BlankFragment();
-                    feedFragment = fragment;
+                    storeFeedFragment = fragment;
                 }
                 fab.show();
                 break;
             case R.id.nav_explore:
                 currentID = R.id.nav_explore;
-                Log.i(LOG, "trying to open explore fragment");
-                Log.i(LOG, "write perm = " + mWriteExternalStorageGranted);
                 if (mWriteExternalStorageGranted) {
                     currentTag = TAG_EXPLORE;
-                    fragment = osmFragment;
+                    fragment = storeExploreFragment;
                     if (fragment == null) {
+                        Log.d(LOG, "creating new osm fragment");
                         fragment = OSMFragment.newInstance(
                                 new GeoPoint(50.633621, 3.0651845),
                                 9,
@@ -197,49 +208,89 @@ public class MainActivity extends AppCompatActivity
                                         .setEnableMultiTouchControls(true)
                                         .setEnableScaleOverlay(true)
                         );
-                        osmFragment = fragment;
+                        storeExploreFragment = fragment;
                     }
                 } else {
                     currentTag = TAG_PERMISSIONS_FRAG;
-                    // TODO add new fragment asking permissions instead of having to reset the nav drawer to the main fragment
-//                    askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                    List<Integer> permissionsToRequest = new ArrayList<>();
-                    permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                    permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                    fragment = PermissionsFragment.newInstance(permissionsToRequest);
+                    fragment = storePermissionsFragment;
+                    if (fragment == null) {
+
+                        List<Integer> permissionsToRequest = new ArrayList<>();
+                        permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                        permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                        fragment = PermissionsFragment.newInstance(permissionsToRequest);
+
+                        storePermissionsFragment = fragment;
+                    }
                 }
                 fab.hide();
+                break;
+            default:
+                Log.w(LOG, "getting fragment but id was incorrect");
                 break;
         }
         return fragment;
     }
 
+    private int getFragmentIDByTag(String tag) {
+        switch (tag) {
+            case TAG_FEED:
+                return R.id.nav_feed;
+            case TAG_EXPLORE:
+                return R.id.nav_explore;
+            case TAG_PERMISSIONS_FRAG:
+                return R.id.nav_explore;
+            default:
+                return -1;
+        }
+    }
+
     private void switchFragment(Fragment fragment, int itemId) {
         if (fragment != null) {
-            if (itemId == nav_feed) {
-                // here we replace content_frame with the main fragment. We also clear the back stack so a back press from the home fragment
-                // exits the app instead of switching fragments
+
+            removeOldFragment();
+
+            addNewFragmentToContentFrame(fragment, itemId);
+        }
+    }
+
+    private void removeOldFragment() {
+        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        if (frag != null) {
+            Log.d(LOG, "removed from content_frame with tag = " + frag.getTag());
+            getSupportFragmentManager().beginTransaction().remove(frag).commit();
+            getSupportFragmentManager().executePendingTransactions();
+        }
+    }
+
+    private void addNewFragmentToContentFrame(Fragment fragment, int itemId) {
+        switch (itemId) {
+            case nav_feed:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(R.id.content_frame, fragment, currentTag)
+                        .add(R.id.content_frame, fragment, currentTag)
                         .commit();
-                getSupportFragmentManager().executePendingTransactions();
 
+                getSupportFragmentManager().executePendingTransactions();
                 getSupportFragmentManager().popBackStack();
-                Log.i(LOG, "replaced content_frame with " + tag);
-            } else {
+
+                Log.d(LOG, "added to content_frame with " + fragment.getTag());
+                break;
+            case nav_explore:
                 // here we add to content_frame so that a back press will go backwards in the stack instead of exiting the app.
                 getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(R.id.content_frame, fragment, currentTag)
+                        .add(R.id.content_frame, fragment, currentTag)
                         .addToBackStack(currentTag)
                         .commit();
 
+                Log.d(LOG, "added to content_frame with " + fragment.getTag());
                 getSupportFragmentManager().executePendingTransactions();
-                Log.i(LOG, "add to content_frame with " + tag);
-            }
+                break;
+            default:
+                Log.w(LOG, "was expected to add fragment but id was incorrect");
+                break;
         }
     }
 
@@ -264,16 +315,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Asks for permission to all dangerous permissions declared in the manifest.
-     */
-    private void verifyAllPermissions() {
-        askSpecificPermission(this, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        askSpecificPermission(this, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(LOG, "saving current tag with " + currentTag);
+        outState.putString(KEY_CURRENT_TAG, currentTag);
+        super.onSaveInstanceState(outState);
     }
 
     public static void askSpecificPermission(Activity activity, int permission) {
-        Log.i(LOG, "asking for permission int = " + permission);
         switch (permission) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 int fineGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -285,19 +334,12 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
-                Log.i(LOG, "checking for write permissions");
                 int writeGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                 if (writeGranted != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        showExplanation(activity, "External sdcard access permission request", "We need to save the maps to your device", Manifest.permission
-                                .WRITE_EXTERNAL_STORAGE, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                    } else {
-                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                    }
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                 } else {
-                    Log.i(LOG, "write permission already granted");
                     mWriteExternalStorageGranted = true;
                 }
                 break;
@@ -322,11 +364,7 @@ public class MainActivity extends AppCompatActivity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
                     mWriteExternalStorageGranted = true;
-                } else {
-                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
-                    mWriteExternalStorageGranted = false;
                 }
             }
         }

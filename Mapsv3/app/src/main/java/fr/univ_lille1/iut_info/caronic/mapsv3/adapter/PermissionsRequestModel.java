@@ -8,11 +8,17 @@ public class PermissionsRequestModel {
 
     private String title;
     private final int PERMISSION_REQUEST_CODE;
+    private String description;
 
-
-    public PermissionsRequestModel(String title, int permission_request_code) {
+    public PermissionsRequestModel(String title, int PERMISSION_REQUEST_CODE) {
         this.title = title;
-        PERMISSION_REQUEST_CODE = permission_request_code;
+        this.PERMISSION_REQUEST_CODE = PERMISSION_REQUEST_CODE;
+        this.description = null;
+    }
+
+    public PermissionsRequestModel(int PERMISSION_REQUEST_CODE, String title, String description) {
+        this(title, PERMISSION_REQUEST_CODE);
+        this.description = description;
     }
 
     public String getTitle() {
@@ -25,5 +31,13 @@ public class PermissionsRequestModel {
 
     public int getPERMISSION_REQUEST_CODE() {
         return PERMISSION_REQUEST_CODE;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

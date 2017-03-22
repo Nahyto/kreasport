@@ -11,16 +11,12 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.views.MapView;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
-import fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants;
 import fr.univ_lille1.iut_info.caronic.mapsv3.other.RectangleView;
 import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
-
-import static android.R.attr.padding;
 
 /**
  * Created by Christopher Caroni on 17/03/2017.

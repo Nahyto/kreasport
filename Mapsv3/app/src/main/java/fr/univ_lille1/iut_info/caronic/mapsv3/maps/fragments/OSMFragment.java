@@ -29,8 +29,6 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link OSMFragment#newInstance} factory method to

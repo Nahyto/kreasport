@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Mapsv3</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="offline_areas_download_options_title">Download a new area</string>
+    <string name="offline_areas_button_download_custom_area">Custom Area</string>
+
+    <string name="offline_areas_action_bar_title">Offline areas</string>
+    <string name="offline_areas_pre_downloaded_areas_title">Downloaded areas</string>
+    <string name="offline_areas_downloaded_area_size">%d MB</string>
+
+    <string name="offline_area_selection_action_bar_title">Download this area?</string>
+    <string name="area_selection_confirmation_button">Download</string>
+    <string name="area_selection_cancel_button">Cancel</string>
+
+    <string name="offline_area_selection_download_size_info">"Download may take up to %d MB."</string>
+    <string name="offline_area_selection_notification_error">Error downloading %s</string>
+    <string name="offline_area_selection_notification_ongoing" formatted="false">Downloading %d of %d tiles</string>
+    <string name="offline_area_selection_notification_success">Finished downloading %s</string>
+    <string name="offline_area_selection_notification_start">Starting download of %s</string>
+
+
+    <string name="fragment_permissions_title">Uh oh!</string>
+    <string name="fragment_permissions_sub_title">We need the following permissions to display the map:</string>
+    <string name="activity_explore_title">Explore</string>
+    <string name="activity_home_title">Home</string>
+    <string name="osm_fragment_first_run_location_info">Getting current location...</string>
+    <string name="offline_areas_no_areas_info">You haven\'t downloaded any areas yet</string>
+    <string name="settings_title">Settings</string>
+    <string name="help_title">Help</string>
+</resources>

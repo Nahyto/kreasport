@@ -1,6 +1,7 @@
 *.iml
 .gradle
 gradle.properties
+/Mapsv3/build.gradle
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries

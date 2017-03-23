@@ -39,6 +39,9 @@ public interface ParcoursDao {
    @SqlQuery("select * from balise where parcours = :id")
    @RegisterMapperFactory(BeanMapperFactory.class)
    List<Balise> getBalisebyId(@Bind("id") int id);
+   
+   @SqlUpdate("update parcours SET name = :name , key = :key  where id = :id")
+   void updateParcours(@Bind("name")String name, @Bind("key") String key, @Bind("id") int id);
 
     void close();
 }

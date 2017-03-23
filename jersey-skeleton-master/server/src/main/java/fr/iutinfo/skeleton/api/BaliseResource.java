@@ -95,7 +95,14 @@ public class BaliseResource {
         remplirB(user.getParcours());
         return dto;
     }
-
+    
+    @PUT
+    @Path("/{id}")
+    public void updateBalise(@PathParam("id") int id,BaliseDto dto) throws SQLException {
+        Balise user = new Balise();
+        user.initFromDto(dto);
+        dao.updateBalise(user.getLongitude(), user.getLatitude(), id);
+    }
     @GET
     @Path("/{name}")
     public BaliseDto getBalise(@PathParam("name") String name) {

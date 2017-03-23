@@ -41,8 +41,8 @@ public interface BaliseDAO {
     @RegisterMapperFactory(BeanMapperFactory.class)
     Balise findById(@Bind("id") int id);
 
-    @SqlUpdate("update parcours SET balise = :balise where id = :id")
-    void updateBalise(@Bind("id")int id, @Bind("balise") String balise);
+    @SqlUpdate("update balise SET longitude = :longitude , latitude = :latitude  where id = :id")
+    void updateBalise(@Bind("longitude")double longitude, @Bind("latitude") double latitude, @Bind("id") int id);
     
     void close();
 }

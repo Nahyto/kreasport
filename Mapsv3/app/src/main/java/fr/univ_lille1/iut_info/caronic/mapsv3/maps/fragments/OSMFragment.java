@@ -38,6 +38,7 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayWithFocus;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,6 +59,7 @@ public class OSMFragment extends Fragment {
     private RotationGestureOverlay mRotationGestureOverlay;
     protected int zoom;
 
+    private final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
     private MapView mMapView;
     private MapOptions mMapOptions;
 
@@ -88,6 +90,7 @@ public class OSMFragment extends Fragment {
         return fragment;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,8 +113,7 @@ public class OSMFragment extends Fragment {
         addBalises();
         basicMapSetup();
 
-        goThroughOptions();
-
+        Utils.goThroughOptions(getContext(),mMapView,mMapOptions);
         restorePosition();
 
         return mMapView;

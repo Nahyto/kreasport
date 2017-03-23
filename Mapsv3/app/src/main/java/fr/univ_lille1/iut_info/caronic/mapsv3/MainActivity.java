@@ -502,4 +502,7 @@ public class MainActivity extends AppCompatActivity
         osmFrag.addParcoursjsonParcours(jsonParcours);
     }
 
+    public void downloadJsonDummy(View view) {
+        String response = 
+    }
 }

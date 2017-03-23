@@ -22,7 +22,6 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.iutinfo.skeleton.common.dto.BaliseDto;
 import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 
 @Path("/parcours")
@@ -84,7 +83,7 @@ public class ParcoursResource {
     public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {
         List<Parcours> users;
         if (query == null) {
-            users = dao.all();
+			users = dao.allWithBalises();
         } else {
             logger.debug("Search users with query: " + query);
             users = dao.search("%" + query + "%");

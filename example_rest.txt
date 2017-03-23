@@ -1,0 +1,16 @@
+http://localhost:8080/v1/parcours
+
+{
+id1,
+namepremier
+}
+
+
+http://localhost:8080/v1/balise
+
+{
+id1,
+longitude50.6136638,
+latitude3.1347507,
+parcours1
+}

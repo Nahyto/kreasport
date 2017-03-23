@@ -1,10 +1,14 @@
 package fr.iutinfo.skeleton.api;
 
-import org.skife.jdbi.v2.sqlobject.*;
+import java.util.List;
+
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.BindBean;
+import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import org.skife.jdbi.v2.tweak.BeanMapperFactory;
-
-import java.util.List;
 
 public interface ParcoursDao {
     @SqlUpdate("create table parcours (id integer primary key autoincrement, name varchar(100), key varchar(100), balise varchar(100))")
@@ -31,6 +35,10 @@ public interface ParcoursDao {
     @SqlQuery("select * from parcours order by id")
     @RegisterMapperFactory(BeanMapperFactory.class)
     List<Parcours> all();
+
+	@SqlQuery("select * from parcours INNER JOIN balise ON parcours.id = balise.parcours ORDER BY parcours.id")
+	@RegisterMapperFactory(BeanMapperFactory.class)
+	List<Parcours> allWithBalises();
 
     @SqlQuery("select * from parcours where id = :id")
     @RegisterMapperFactory(BeanMapperFactory.class)

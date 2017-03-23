@@ -32,6 +32,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
@@ -52,18 +53,14 @@ public class OSMFragment extends Fragment {
     protected static final String KEY_INITIAL_POINT = "initial_point";
     protected static final String KEY_ZOOM = "zoom";
     protected static final String KEY_MAP_OPTIONS = "map_options";
-    public static final String KEY_NEW_PARCOURS = "mapsv3.key_new_parcours";
 
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mParcoursOverlay;
-    private RotationGestureOverlay mRotationGestureOverlay;
     protected int zoom;
 
-    private final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
     private MapView mMapView;
     private MapOptions mMapOptions;
 
-    private MyLocationNewOverlay mLocationNewOverlay;
 
     public OSMFragment() {
         // Required empty public constructor
@@ -110,10 +107,10 @@ public class OSMFragment extends Fragment {
         // set default location to the one specified on newInstance. Will still animate/move to last saved location after.
         // This is in case there is a delay in acquiring current/last position
         mMapView.getController().setCenter(initialPoint);
-        addBalises();
+        initParcoursOverlay();
         basicMapSetup();
 
-        Utils.goThroughOptions(getContext(),mMapView,mMapOptions);
+        Utils.goThroughOptions(getContext(), mMapView, mMapOptions);
         restorePosition();
 
         return mMapView;
@@ -191,36 +188,6 @@ public class OSMFragment extends Fragment {
         }
     }
 
-    public void addBalises(){
-        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-        Context context = getActivity();
-        items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
-                9735936))); // Hannover
-        items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin
-        items.add(new OverlayItem(
-                "Washington",
-                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
-        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
-
-			/* OnTapListener for the Markers, shows a simple Toast. */
-
-        mParcoursOverlay = new CustomOverlayWithFocus(getContext(), items, CustomOverlayWithFocus.getListener(getContext()));
-        mParcoursOverlay.setFocusItemsOnTap(true);
-        mParcoursOverlay.setFocusedItem(0);
-        //https://github.com/osmdroid/osmdroid/issues/317
-        //you can override the drawing characteristics with this
-        mParcoursOverlay.setMarkerBackgroundColor(Color.BLUE);
-        mParcoursOverlay.setMarkerTitleForegroundColor(Color.WHITE);
-        mParcoursOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
-        mParcoursOverlay.setDescriptionBoxPadding(15);
-
-        mMapView.getOverlays().add(mParcoursOverlay);
-
-        mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-        mRotationGestureOverlay.setEnabled(false);
-        mMapView.getOverlays().add(mRotationGestureOverlay);
-    }
-
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         saveCurrentPosition();
@@ -248,7 +215,8 @@ public class OSMFragment extends Fragment {
     /**
      * Restores the old position in the MapView from the arguments of the fragment.
      */
-    @SuppressWarnings({"ResourceType"}) // we can ignore because we only launch this fragment after checking permissions.
+    @SuppressWarnings({"ResourceType"})
+    // we can ignore because we only launch this fragment after checking permissions.
     private void restorePosition() {
 
         final IMapController mapController = mMapView.getController();
@@ -290,13 +258,42 @@ public class OSMFragment extends Fragment {
         Balise premier = parcours.getBaliseList().get(0);
         GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
         OverlayItem item = new OverlayItem(parcours.getName(), parcours.getDescription(), point);
-        addbaliseToOverlay(item);
+        addBaliseToOverlay(item);
 
         mMapView.invalidate();
     }
 
-    private void addbaliseToOverlay(OverlayItem item) {
+    private void addBaliseToOverlay(OverlayItem item) {
         mParcoursOverlay.addItem(item);
         mMapView.invalidate();
+    }
+
+    public void initParcoursOverlay() {
+        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+        addDummyParcours(items);
+
+		ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomOverlayWithFocus.getListener(getContext());
+        mParcoursOverlay = new CustomOverlayWithFocus(getContext(), items, listener);
+
+        mParcoursOverlay.setFocusItemsOnTap(true);
+        mParcoursOverlay.setFocusedItem(0);
+
+        mParcoursOverlay.setMarkerBackgroundColor(Color.BLUE);
+        mParcoursOverlay.setMarkerTitleForegroundColor(Color.WHITE);
+        mParcoursOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
+        mParcoursOverlay.setDescriptionBoxPadding(15);
+
+        mMapView.getOverlays().add(mParcoursOverlay);
+    }
+
+    private void addDummyParcours(List<OverlayItem> items) {
+        items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
+                9735936))); // Hannover
+        items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin
+        items.add(new OverlayItem(
+                "Washington",
+                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
+        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
+
     }
 }

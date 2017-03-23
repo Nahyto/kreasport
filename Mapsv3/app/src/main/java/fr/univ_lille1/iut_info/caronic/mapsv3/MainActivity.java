@@ -451,13 +451,16 @@ public class MainActivity extends AppCompatActivity
     public void downloadJson(View view) {
 
         JsonTask task = new JsonTask();
-        task.execute("https://10.0.2.2:8080/v1/parcours");
+        //task.execute("https://10.0.2.2:8080/v1/parcours");
+
+        task.execute("http://10.0.2.2:8080/v1/user");
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
         TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
 
         String jsonParcours = task.getJsonText();
         if (jsonParcours != null && !jsonParcours.equals("")) {
             tv.setText(jsonParcours);
+            Toast.makeText(this, "" + jsonParcours, Toast.LENGTH_SHORT).show();
             addJsonParcoursToFragment(jsonParcours);
         } else {
             tv.setText("Could not download the run");

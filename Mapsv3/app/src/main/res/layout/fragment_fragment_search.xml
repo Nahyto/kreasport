@@ -116,7 +116,7 @@
             android:text="Create"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/create"
+            android:id="@+id/fragment_search_create"
             android:layout_marginBottom="17dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />

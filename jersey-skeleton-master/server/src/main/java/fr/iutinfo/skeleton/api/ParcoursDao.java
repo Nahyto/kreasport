@@ -36,7 +36,9 @@ public interface ParcoursDao {
     @RegisterMapperFactory(BeanMapperFactory.class)
     Parcours findById(@Bind("id") int id);
     
-   
+   @SqlQuery("select * from balise where parcours = :id")
+   @RegisterMapperFactory(BeanMapperFactory.class)
+   List<Balise> getBalisebyId(@Bind("id") int id);
 
     void close();
 }

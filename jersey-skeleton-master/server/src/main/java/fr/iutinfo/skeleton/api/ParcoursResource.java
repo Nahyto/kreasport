@@ -3,12 +3,7 @@ package fr.iutinfo.skeleton.api;
 import static fr.iutinfo.skeleton.api.BDDFactory.getDbi;
 import static fr.iutinfo.skeleton.api.BDDFactory.tableExist;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +43,7 @@ public class ParcoursResource {
 			dao.dropParcoursTable();
 		}*/
 		ParcoursResource p = new ParcoursResource();
+		//dao.insert(new Parcours(1, "Chasse au trésor", "5648413254654dsfgsdfg"));
 		System.out.println(dao.all());
 	}
     
@@ -72,6 +68,7 @@ public class ParcoursResource {
         }
         return user.convertToDto();
     }
+    
 
     @GET
     public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {
@@ -84,9 +81,14 @@ public class ParcoursResource {
         }
         return users.stream().map(Parcours::convertToDto).collect(Collectors.toList());
     }
+    
+    @GET
+    @Path("/balise/{id}")
+    public List<Balise> getAllBaliseParcours(@PathParam("id") int id){
+    	return dao.getBalisebyId(id);
+    }
 
     @DELETE
-    @Path("/{id}")
     public void deleteUser(@PathParam("id") int id) {
         dao.delete(id);
     }

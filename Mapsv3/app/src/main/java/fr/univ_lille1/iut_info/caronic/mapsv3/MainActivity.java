@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -194,34 +195,24 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_explore:
                 currentID = R.id.nav_explore;
-                if (mWriteExternalStorageGranted) {
-                    currentTag = TAG_EXPLORE;
-                    fragment = storeExploreFragment;
-                    if (fragment == null) {
-                        Log.d(LOG, "creating new osm fragment");
-                        fragment = OSMFragment.newInstance(
-                                new GeoPoint(50.633621, 3.0651845),
-                                9,
-                                new MapOptions()
-                                        .setEnableLocationOverlay(true)
-                                        .setEnableCompass(true)
-                                        .setEnableMultiTouchControls(true)
-                                        .setEnableScaleOverlay(true)
-                        );
-                        storeExploreFragment = fragment;
+                if (Build.VERSION.SDK_INT > 22) {
+                    if (mWriteExternalStorageGranted) {
+                        setFragToOSMFrag(fragment);
+                    } else {
+                        currentTag = TAG_PERMISSIONS_FRAG;
+                        fragment = storePermissionsFragment;
+                        if (fragment == null) {
+
+                            List<Integer> permissionsToRequest = new ArrayList<>();
+                            permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                            permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                            fragment = PermissionsFragment.newInstance(permissionsToRequest);
+
+                            storePermissionsFragment = fragment;
+                        }
                     }
                 } else {
-                    currentTag = TAG_PERMISSIONS_FRAG;
-                    fragment = storePermissionsFragment;
-                    if (fragment == null) {
-
-                        List<Integer> permissionsToRequest = new ArrayList<>();
-                        permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                        permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                        fragment = PermissionsFragment.newInstance(permissionsToRequest);
-
-                        storePermissionsFragment = fragment;
-                    }
+                    setFragToOSMFrag(fragment);
                 }
                 fab.hide();
                 break;
@@ -230,6 +221,24 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
         return fragment;
+    }
+
+    private void setFragToOSMFrag(Fragment fragment) {
+        currentTag = TAG_EXPLORE;
+        fragment = storeExploreFragment;
+        if (fragment == null) {
+            Log.d(LOG, "creating new osm fragment");
+            fragment = OSMFragment.newInstance(
+                    new GeoPoint(50.633621, 3.0651845),
+                    9,
+                    new MapOptions()
+                            .setEnableLocationOverlay(true)
+                            .setEnableCompass(true)
+                            .setEnableMultiTouchControls(true)
+                            .setEnableScaleOverlay(true)
+            );
+            storeExploreFragment = fragment;
+        }
     }
 
     private int getFragmentIDByTag(String tag) {

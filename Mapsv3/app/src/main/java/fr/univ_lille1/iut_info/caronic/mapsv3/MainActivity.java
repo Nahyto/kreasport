@@ -30,6 +30,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.osmdroid.util.GeoPoint;
 
 import java.io.BufferedInputStream;
@@ -52,6 +54,7 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_explore;
@@ -215,6 +218,7 @@ public class MainActivity extends AppCompatActivity
                 currentID = R.id.nav_explore;
                 if (Build.VERSION.SDK_INT > 22) {
                     if (mWriteExternalStorageGranted) {
+                        currentTag = TAG_EXPLORE;
                         fragment = setFragToOSMFrag();
                     } else {
                         currentTag = TAG_PERMISSIONS_FRAG;
@@ -230,6 +234,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 } else {
+                    currentTag = TAG_EXPLORE;
                     fragment = setFragToOSMFrag();
                 }
                 fab.hide();
@@ -243,7 +248,6 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment setFragToOSMFrag() {
         Fragment fragment;
-        currentTag = TAG_EXPLORE;
         fragment = storeExploreFragment;
         if (fragment == null) {
             Log.d(LOG, "creating new osm fragment");
@@ -428,12 +432,20 @@ public class MainActivity extends AppCompatActivity
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
         TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
 
-        String downloadedText = task.getJsonText();
-        if (downloadedText != null && !downloadedText.equals("")) {
-            tv.setText(task.getJsonText());
+        String jsonParcours = task.getJsonText();
+        if (jsonParcours != null && !jsonParcours.equals("")) {
+            tv.setText(jsonParcours);
+            addJsonParcoursToFragment(jsonParcours);
         } else {
             tv.setText("Could not download the run");
         }
+
+
+    }
+
+    private void addJsonParcoursToFragment(String jsonParcours) {
+        OSMFragment osmFrag = (OSMFragment) setFragToOSMFrag();
+        osmFrag.addParcoursjsonParcours(jsonParcours);
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {

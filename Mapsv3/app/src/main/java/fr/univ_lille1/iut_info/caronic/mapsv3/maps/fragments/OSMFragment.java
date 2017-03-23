@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -33,6 +35,8 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayWithFocus;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 /**
@@ -47,6 +51,7 @@ public class OSMFragment extends Fragment {
     protected static final String KEY_INITIAL_POINT = "initial_point";
     protected static final String KEY_ZOOM = "zoom";
     protected static final String KEY_MAP_OPTIONS = "map_options";
+    public static final String KEY_NEW_PARCOURS = "mapsv3.key_new_parcours";
 
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
@@ -196,26 +201,8 @@ public class OSMFragment extends Fragment {
         items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
 
 			/* OnTapListener for the Markers, shows a simple Toast. */
-        mMyLocationOverlay = new ItemizedOverlayWithFocus<>(items,
-                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                    @Override
-                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                getContext(),
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got single tapped up", Toast.LENGTH_LONG).show();
-                        return true;
-                    }
 
-                    @Override
-                    public boolean onItemLongPress(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                getContext(),
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got long pressed", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                }, context);
+        mMyLocationOverlay = new CustomOverlayWithFocus(getContext(), items, CustomOverlayWithFocus.getListener(getContext()));
         mMyLocationOverlay.setFocusItemsOnTap(true);
         mMyLocationOverlay.setFocusedItem(0);
         //https://github.com/osmdroid/osmdroid/issues/317
@@ -295,4 +282,12 @@ public class OSMFragment extends Fragment {
         }
     }
 
+
+    public void addParcoursjsonParcours(String jsonParcours) {
+        Parcours parcours = new Gson().fromJson(jsonParcours, Parcours.class);
+
+        // TODO add to list
+
+        mMapView.invalidate();
+    }
 }

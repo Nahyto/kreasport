@@ -5,6 +5,10 @@ import android.app.Activity;
 import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.List;
 
 /**
  * Created by Christopher Caroni on 17/03/2017.
@@ -37,6 +41,4 @@ public class Utils {
         int nTiles = cacheManager.possibleTilesInArea(realSize, mMapView.getZoomLevel(), mMapView.getMaxZoomLevel());
         return 0.001 * (Constants.TILE_KB_SIZE * nTiles);
     }
-
-
 }

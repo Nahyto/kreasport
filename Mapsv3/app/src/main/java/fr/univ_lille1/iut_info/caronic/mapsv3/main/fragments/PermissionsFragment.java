@@ -17,8 +17,8 @@ import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity;
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
-import fr.univ_lille1.iut_info.caronic.mapsv3.adapter.PermissionsAdapter;
-import fr.univ_lille1.iut_info.caronic.mapsv3.adapter.PermissionsRequestModel;
+import fr.univ_lille1.iut_info.caronic.mapsv3.main.adapter.PermissionsAdapter;
+import fr.univ_lille1.iut_info.caronic.mapsv3.main.adapter.PermissionsRequestModel;
 
 /**
  * A simple {@link Fragment} subclass.

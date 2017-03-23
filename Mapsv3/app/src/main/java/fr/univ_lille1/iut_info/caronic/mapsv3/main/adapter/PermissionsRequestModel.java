@@ -1,4 +1,4 @@
-package fr.univ_lille1.iut_info.caronic.mapsv3.adapter;
+package fr.univ_lille1.iut_info.caronic.mapsv3.main.adapter;
 
 /**
  * Created by Chris on 22-Mar-17.

@@ -2,9 +2,11 @@ package fr.univ_lille1.iut_info.caronic.mapsv3;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,14 +22,31 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import org.osmdroid.util.GeoPoint;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +54,7 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
 
@@ -191,7 +211,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = storeFeedFragment;
                 if (fragment == null) {
                     Log.d(LOG, "creating new blank fragment");
-                    fragment = new BlankFragment();
+                    fragment = BlankFragment.newInstance();
                     storeFeedFragment = fragment;
                 }
                 fab.show();
@@ -200,6 +220,7 @@ public class MainActivity extends AppCompatActivity
                 currentID = R.id.nav_explore;
                 if (Build.VERSION.SDK_INT > 22) {
                     if (mWriteExternalStorageGranted) {
+                        currentTag = TAG_EXPLORE;
                         fragment = setFragToOSMFrag();
                     } else {
                         currentTag = TAG_PERMISSIONS_FRAG;
@@ -215,6 +236,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 } else {
+                    currentTag = TAG_EXPLORE;
                     fragment = setFragToOSMFrag();
                 }
                 fab.hide();
@@ -237,7 +259,6 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment setFragToOSMFrag() {
         Fragment fragment;
-        currentTag = TAG_EXPLORE;
         fragment = storeExploreFragment;
         if (fragment == null) {
             Log.d(LOG, "creating new osm fragment");
@@ -426,4 +447,99 @@ public class MainActivity extends AppCompatActivity
                 });
         builder.create().show();
     }
+
+    public void downloadJson(View view) {
+
+        JsonTask task = new JsonTask();
+        task.execute("https://10.0.2.2:8080/v1/parcours");
+        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
+
+        String jsonParcours = task.getJsonText();
+        if (jsonParcours != null && !jsonParcours.equals("")) {
+            tv.setText(jsonParcours);
+            addJsonParcoursToFragment(jsonParcours);
+        } else {
+            tv.setText("Could not download the run");
+        }
+
+
+    }
+
+    private void addJsonParcoursToFragment(String jsonParcours) {
+        OSMFragment osmFrag = (OSMFragment) setFragToOSMFrag();
+        osmFrag.addParcoursjsonParcours(jsonParcours);
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        private String jsonText;
+
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            Toast.makeText(MainActivity.this, "please wait", Toast.LENGTH_SHORT).show();
+        }
+
+        protected String doInBackground(String... params) {
+
+
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                Log.i(LOG, "connection to " + params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+
+                }
+
+                return buffer.toString();
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Toast.makeText(MainActivity.this, "end execution", Toast.LENGTH_SHORT).show();
+            jsonText = result;
+        }
+
+        public String getJsonText() {
+            return jsonText;
+        }
+    }
+
+
 }

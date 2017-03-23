@@ -27,6 +27,10 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.List;
 
 /**
  * Created by Christopher Caroni on 17/03/2017.
@@ -34,11 +38,11 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 public class Utils {
 
-    public static void addBalisesToOverlay(ArrayList<OverlayItem> items,String titre, String description, double longitude, double latitude){
+    public static void addBalises(ArrayList<OverlayItem> items,String titre, String description, double longitude, double latitude){
         items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
     }
 
-    public static void addBalises(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay){
+    public static void addBalisesToOverlay(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay){
 			/* OnTapListener for the Markers, shows a simple Toast. */
         mMyLocationOverlay.setFocusItemsOnTap(true);
         mMyLocationOverlay.setFocusedItem(0);
@@ -133,6 +137,4 @@ public class Utils {
         int nTiles = cacheManager.possibleTilesInArea(realSize, mMapView.getZoomLevel(), mMapView.getMaxZoomLevel());
         return 0.001 * (Constants.TILE_KB_SIZE * nTiles);
     }
-
-
 }

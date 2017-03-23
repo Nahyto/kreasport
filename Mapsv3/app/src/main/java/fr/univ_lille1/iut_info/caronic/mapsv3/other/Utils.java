@@ -1,18 +1,83 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.*;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.widget.Toast;
 
 import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 /**
  * Created by Christopher Caroni on 17/03/2017.
  */
 
 public class Utils {
+    @SuppressWarnings({"ResourceType"})
+    public static void goThroughOptions(final Context context, MapView mMapView, MapOptions mMapOptions) {
+        if (mMapOptions != null) {
+            if (mMapOptions.isEnableLocationOverlay()) {
+                LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        Toast.makeText(context, "Update", Toast.LENGTH_SHORT).show();
+                    }
 
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+
+                    }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+
+                    }
+                });
+                MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), mMapView);
+                mLocationOverlay.enableMyLocation();
+                mMapView.getOverlays().add(mLocationOverlay);
+            }
+            if (mMapOptions.isEnableCompass()) {
+                CompassOverlay mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context), mMapView);
+                mCompassOverlay.enableCompass();
+                mMapView.getOverlays().add(mCompassOverlay);
+            }
+            if (mMapOptions.isEnableMultiTouchControls()) {
+                mMapView.setMultiTouchControls(true);
+            }
+            if (mMapOptions.isEnableRotationGesture()) {
+                RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
+                mRotationGestureOverlay.setEnabled(true);
+                mMapView.getOverlays().add(mRotationGestureOverlay);
+            }
+            if (mMapOptions.isEnableScaleOverlay()) {
+                ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(mMapView);
+                mScaleBarOverlay.setCentred(true);
+                //play around with these values to get the location on screen in the right place for your application
+                mScaleBarOverlay.setScaleBarOffset(100, 10);
+                mMapView.getOverlays().add(mScaleBarOverlay);
+            }
+        }
+    }
     public static int getPixelsFromDIP(Activity activity, int padding_in_dp) {
         final float scale = activity.getResources().getDisplayMetrics().density;
         return (int) (padding_in_dp * scale + 0.5f);

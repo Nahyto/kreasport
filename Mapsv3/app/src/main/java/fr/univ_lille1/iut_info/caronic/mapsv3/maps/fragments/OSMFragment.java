@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,6 +52,7 @@ public class OSMFragment extends Fragment {
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
+    private final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
     protected int zoom;
 
     private MapView mMapView;
@@ -83,6 +85,10 @@ public class OSMFragment extends Fragment {
         return fragment;
     }
 
+    public void searchView(){
+
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,8 +111,7 @@ public class OSMFragment extends Fragment {
         addBalises();
         basicMapSetup();
 
-        goThroughOptions();
-
+        Utils.goThroughOptions(getContext(),mMapView,mMapOptions);
         restorePosition();
 
         return mMapView;
@@ -128,72 +133,12 @@ public class OSMFragment extends Fragment {
         mMapView.setTilesScaledToDpi(true);
     }
 
-    /**
-     * Enables options from {@link MapOptions}
-     */
-    @SuppressWarnings({"ResourceType"})
-    private void goThroughOptions() {
-        if (mMapOptions != null) {
-            if (mMapOptions.isEnableLocationOverlay()) {
-                LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        Toast.makeText(getContext(), "Update", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-
-                    }
-                });
-                MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getContext()), mMapView);
-                mLocationOverlay.enableMyLocation();
-                mMapView.getOverlays().add(mLocationOverlay);
-            }
-            if (mMapOptions.isEnableCompass()) {
-                CompassOverlay mCompassOverlay = new CompassOverlay(getContext(), new InternalCompassOrientationProvider(getContext()), mMapView);
-                mCompassOverlay.enableCompass();
-                mMapView.getOverlays().add(mCompassOverlay);
-            }
-            if (mMapOptions.isEnableMultiTouchControls()) {
-                mMapView.setMultiTouchControls(true);
-            }
-            if (mMapOptions.isEnableRotationGesture()) {
-                RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-                mRotationGestureOverlay.setEnabled(true);
-                mMapView.getOverlays().add(mRotationGestureOverlay);
-            }
-            if (mMapOptions.isEnableScaleOverlay()) {
-                ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(mMapView);
-                mScaleBarOverlay.setCentred(true);
-                //play around with these values to get the location on screen in the right place for your application
-                mScaleBarOverlay.setScaleBarOffset(100, 10);
-                mMapView.getOverlays().add(mScaleBarOverlay);
-            }
-        }
+    public void addBalisesTmp(String titre, String description, double longitude, double latitude){
+        items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
     }
 
     public void addBalises(){
-        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-        Context context = getActivity();
-        items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
-                9735936))); // Hannover
-        items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin
-        items.add(new OverlayItem(
-                "Washington",
-                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
-        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
+        Context context = getActivity();// San Francisco
 
 			/* OnTapListener for the Markers, shows a simple Toast. */
         mMyLocationOverlay = new ItemizedOverlayWithFocus<>(items,

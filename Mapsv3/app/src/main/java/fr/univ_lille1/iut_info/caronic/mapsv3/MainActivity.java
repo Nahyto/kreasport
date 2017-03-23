@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,13 +27,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
 
 import static android.R.attr.tag;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_feed;
@@ -46,6 +45,7 @@ public class MainActivity extends AppCompatActivity
 
     public final static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     public final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
+    private static final String TAG_CREATE = "CREATE";
 
     public static boolean mLocationAccessGranted;
     public static boolean mWriteExternalStorageGranted;
@@ -207,6 +207,15 @@ public class MainActivity extends AppCompatActivity
                 }
                 fab.hide();
                 break;
+            case R.id.create:
+                currentID = R.id.create;
+                currentTag = TAG_CREATE;
+                fragment = FragmentSearch.newInstance(
+                        new MapOptions()
+                        .setEnableLocationOverlay(true)
+                        .setEnableCompass(true)
+                        .setEnableMultiTouchControls(true)
+                        .setEnableScaleOverlay(true));
         }
         return fragment;
     }

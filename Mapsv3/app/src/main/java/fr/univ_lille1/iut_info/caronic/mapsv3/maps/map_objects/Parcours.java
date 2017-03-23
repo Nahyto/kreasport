@@ -6,19 +6,23 @@ import java.util.List;
  * Created by Chris on 23-Mar-17.
  */
 
-public class Parcours {
+public class Parcours extends BaseItem {
 
-    private String name;
     private String description;
     private String key;
     private List<Balise> baliseList;
 
-    public String getName() {
-        return name;
+    public Parcours(String title) {
+        super(title);
     }
 
-    public void setName(String name) {
-        this.name = name;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getKey() {
@@ -37,11 +41,4 @@ public class Parcours {
         this.baliseList = baliseList;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

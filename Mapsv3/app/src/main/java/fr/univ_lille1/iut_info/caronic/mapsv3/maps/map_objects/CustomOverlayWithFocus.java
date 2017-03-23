@@ -13,7 +13,7 @@ import java.util.List;
  * Created by Chris on 23-Mar-17.
  */
 
-public class CustomOverlayWithFocus extends ItemizedOverlayWithFocus {
+public class CustomOverlayWithFocus<Item extends OverlayItem> extends ItemizedOverlayWithFocus<Item> {
 
     private Context context;
     private List listItems;
@@ -24,6 +24,12 @@ public class CustomOverlayWithFocus extends ItemizedOverlayWithFocus {
 
         this.context = pContext;
         this.listItems = aList;
+    }
+
+    @Override
+    public boolean addItem(final Item item) {
+        final boolean result = mItemList.add(item);
+        return result;
     }
 
     public static ItemizedIconOverlay.OnItemGestureListener getListener(final Context context) {

@@ -30,18 +30,13 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONObject;
-
-import java.net.Authenticator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.osmdroid.util.GeoPoint;
 
-import java.net.PasswordAuthentication;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,11 +45,14 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 import fr.univ_lille1.iut_info.caronic.mapsv3.volley.VolleySingleton;
 
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_explore;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_feed;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -214,17 +212,21 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_explore:
                 currentID = R.id.nav_explore;
                 if (Build.VERSION.SDK_INT > 22) {
+
+                    List<Integer> permissionsToRequest = new ArrayList<>();
+                    permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+                    verifyPermissions(permissionsToRequest);
+
                     if (mWriteExternalStorageGranted) {
                         currentTag = TAG_EXPLORE;
-                        fragment = setFragToOSMFrag();
+                        fragment = restoreOrCreateOSMFragment();
                     } else {
                         currentTag = TAG_PERMISSIONS_FRAG;
                         fragment = storePermissionsFragment;
                         if (fragment == null) {
 
-                            List<Integer> permissionsToRequest = new ArrayList<>();
-                            permissionsToRequest.add(PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                            permissionsToRequest.add(PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                             fragment = PermissionsFragment.newInstance(permissionsToRequest);
 
                             storePermissionsFragment = fragment;
@@ -232,7 +234,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 } else {
                     currentTag = TAG_EXPLORE;
-                    fragment = setFragToOSMFrag();
+                    fragment = restoreOrCreateOSMFragment();
                 }
                 fab.hide();
                 break;
@@ -252,7 +254,7 @@ public class MainActivity extends AppCompatActivity
         return fragment;
     }
 
-    private Fragment setFragToOSMFrag() {
+    private Fragment restoreOrCreateOSMFragment() {
         Fragment fragment;
         fragment = storeExploreFragment;
         if (fragment == null) {
@@ -370,6 +372,13 @@ public class MainActivity extends AppCompatActivity
         Log.d(LOG, "saving current tag with " + currentTag);
         outState.putString(KEY_CURRENT_TAG, currentTag);
         super.onSaveInstanceState(outState);
+    }
+
+
+    public void verifyPermissions(List<Integer> permissionsToRequest) {
+        for (Integer request : permissionsToRequest) {
+            askSpecificPermission(this, request);
+        }
     }
 
     public static void askSpecificPermission(Activity activity, int permission) {
@@ -497,12 +506,63 @@ public class MainActivity extends AppCompatActivity
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
+    /**
+     * Adds the json string to OSMFragment's arguments so they'll be loading in onCreateView automatically
+     * @param jsonParcours
+     */
     private void addJsonParcoursToFragment(String jsonParcours) {
-        OSMFragment osmFrag = (OSMFragment) setFragToOSMFrag();
-        osmFrag.addParcoursjsonParcours(jsonParcours);
+        OSMFragment osmFrag = (OSMFragment) restoreOrCreateOSMFragment();
+
+        Bundle fragArgs = osmFrag.getArguments();
+        fragArgs.putString(KEY_PARCOURS, jsonParcours);;
+
+        osmFrag.setArguments(fragArgs);
+
+        displaySelectedScreen(R.id.nav_explore);
     }
 
     public void downloadJsonDummy(View view) {
-        String response = 
+
+
+        String dummy = getDummyParcoursJsonString();
+
+        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        final TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
+        tv.setText(dummy);
+        addJsonParcoursToFragment(dummy);
+    }
+
+    private String getDummyParcoursJsonString() {
+
+        ArrayList<Parcours> parcoursList = new ArrayList<>();
+
+
+        Parcours parcours = new Parcours("Parcours n° 1");
+        parcours.setId(1);
+        parcours.setDescription("This one should be just at the IUT's entrance");
+        List<Balise> balistList = new ArrayList<>();
+        balistList.add(new Balise("IUT entrance", 50.613588, 3.137106, 1));
+        balistList.add(new Balise("4A20", 50.614174, 3.137404, 1));
+        parcours.setBaliseList(balistList);
+
+        parcoursList.add(parcours);
+
+        parcours = new Parcours("Parcours n° 2");
+        parcours.setId(2);
+        parcours.setDescription("This one should be just on the parking's stairs");
+        balistList = new ArrayList<>();
+        balistList.add(new Balise("parking stairs", 50.613346, 3.138080, 1));
+        balistList.add(new Balise("parking exit/entrance", 50.614294, 3.138434, 1));
+        parcours.setBaliseList(balistList);
+
+        parcoursList.add(parcours);
+
+        Type parcoursListType = new TypeToken<ArrayList<Parcours>>(){}.getType();
+
+        String parcoursListJson = new Gson().toJson(parcoursList, parcoursListType);
+        Log.d(LOG, "an example of what we would expect from the server : " + parcoursListJson);
+
+        return parcoursListJson;
+
     }
 }

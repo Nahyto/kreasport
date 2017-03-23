@@ -1,21 +1,23 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.BuildConfig;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -25,19 +27,10 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.CopyrightOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
-import org.osmdroid.views.overlay.compass.CompassOverlay;
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-import org.osmdroid.views.overlay.mylocation.DirectedLocationOverlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
@@ -53,11 +46,15 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
  */
 public class OSMFragment extends Fragment {
 
-    protected static final String KEY_FIRST_RUN = "first_run";
+    private static final String LOG = OSMFragment.class.getSimpleName();
 
-    protected static final String KEY_INITIAL_POINT = "initial_point";
-    protected static final String KEY_ZOOM = "zoom";
-    protected static final String KEY_MAP_OPTIONS = "map_options";
+    protected static final String KEY_FIRST_RUN = "mapsv3.osm_frag.first_run";
+
+    protected static final String KEY_INITIAL_POINT = "mapsv3.osm_frag.initial_point";
+    protected static final String KEY_ZOOM = "mapsv3.osm_frag.zoom";
+    protected static final String KEY_MAP_OPTIONS = "mapsv3.osm_frag.map_options";
+
+    public static final String KEY_PARCOURS = "mapsv3.osm_frag.parcours";
 
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mParcoursOverlay;
@@ -126,7 +123,6 @@ public class OSMFragment extends Fragment {
      * Basic map settings such as hw acceleration, copyright overlay...
      */
     private void basicMapSetup() {
-
         Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         mMapView.setTileSource(TileSourceFactory.MAPNIK);
         mMapView.getOverlays().add(new CopyrightOverlay(getContext()));
@@ -135,62 +131,6 @@ public class OSMFragment extends Fragment {
         x.setOvershootTileCache(x.getOvershootTileCache() * 2);
 
         mMapView.setTilesScaledToDpi(true);
-    }
-
-    /**
-     * Enables options from {@link MapOptions}
-     */
-    @SuppressWarnings({"ResourceType"})
-    private void goThroughOptions() {
-        if (mMapOptions != null) {
-            if (mMapOptions.isEnableLocationOverlay()) {
-                LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        Toast.makeText(getContext(), "Update", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-
-                    }
-                });
-                MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getContext()), mMapView);
-                mLocationOverlay.enableMyLocation();
-                mMapView.getOverlays().add(mLocationOverlay);
-            }
-            if (mMapOptions.isEnableCompass()) {
-                CompassOverlay mCompassOverlay = new CompassOverlay(getContext(), new InternalCompassOrientationProvider(getContext()), mMapView);
-                mCompassOverlay.enableCompass();
-                mMapView.getOverlays().add(mCompassOverlay);
-            }
-            if (mMapOptions.isEnableMultiTouchControls()) {
-                mMapView.setMultiTouchControls(true);
-            }
-            if (mMapOptions.isEnableRotationGesture()) {
-                RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-                mRotationGestureOverlay.setEnabled(true);
-                mMapView.getOverlays().add(mRotationGestureOverlay);
-            }
-            if (mMapOptions.isEnableScaleOverlay()) {
-                ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(mMapView);
-                mScaleBarOverlay.setCentred(true);
-                //play around with these values to get the location on screen in the right place for your application
-                mScaleBarOverlay.setScaleBarOffset(100, 10);
-                mMapView.getOverlays().add(mScaleBarOverlay);
-            }
-        }
     }
 
     @Override
@@ -258,17 +198,69 @@ public class OSMFragment extends Fragment {
     }
 
 
-    public void addParcoursjsonParcours(String jsonParcours) {
-        jsonParcours = jsonParcours.substring(1, jsonParcours.length() - 1);
-        Parcours parcours = new Gson().fromJson(jsonParcours, Parcours.class);
-        if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
-            Balise premier = parcours.getBaliseList().get(0);
-            GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
-            OverlayItem item = new OverlayItem(parcours.getName(), parcours.getDescription(), point);
-            addBaliseToOverlay(item);
+    /**
+     * ONLY CALL IF ONCREATEVIEW ALREADY CALLED, OTHERWISE USE FRAGMENT ARGUMENTS
+     * @param parcoursJsonArray
+     */
+    public void addMulmtipleParcoursFromJsonArray(String parcoursJsonArray) {
 
-            mMapView.invalidate();
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(parcoursJsonArray);
+        JsonArray parcoursArray = element.getAsJsonArray();
+
+        for (JsonElement parcoursJson : parcoursArray) {
+            Log.d(LOG, "one parcours = " + parcoursJson.toString());
+
+
+            Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
+            if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
+                Log.d(LOG, "creating new parcours");
+
+                Balise premier = parcours.getBaliseList().get(0);
+                GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
+                OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
+                addBaliseToOverlay(item);
+
+                mMapView.invalidate();
+            } else {
+                Log.d(LOG, "tried adding parcours but didn't contain any balises");
+            }
+
         }
+    }
+
+    private List<OverlayItem> getOverlayFromArguments() {
+        String parcoursJsonArray = getArguments().getString(KEY_PARCOURS);
+        if (parcoursJsonArray != null) {
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(parcoursJsonArray);
+            JsonArray parcoursArray = element.getAsJsonArray();
+
+            List<OverlayItem> result = new ArrayList<>();
+
+            for (JsonElement parcoursJson : parcoursArray) {
+                Log.d(LOG, "one parcours = " + parcoursJson.toString());
+
+
+                Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
+                if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
+                    Log.d(LOG, "creating new parcours");
+
+                    Balise premier = parcours.getBaliseList().get(0);
+                    GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
+                    OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
+
+                    Log.d(LOG, "first balise for parcours = " + point.toString());
+
+                    result.add(item);
+                } else {
+                    Log.d(LOG, "tried adding parcours but didn't contain any balises");
+                }
+
+            }
+            return result;
+        }
+        return null;
     }
 
     private void addBaliseToOverlay(OverlayItem item) {
@@ -277,11 +269,17 @@ public class OSMFragment extends Fragment {
     }
 
     public void initParcoursOverlay() {
-        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-        addDummyParcours(items);
+        final ArrayList<OverlayItem> parcoursMainBalisesList = new ArrayList<OverlayItem>();
+
+        addDummyBalisesToList(parcoursMainBalisesList);
+
+        List<OverlayItem> parcoursFromJson = getOverlayFromArguments();
+        if (parcoursFromJson != null) {
+            parcoursMainBalisesList.addAll(parcoursFromJson);
+        }
 
         ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomOverlayWithFocus.getListener(getContext());
-        mParcoursOverlay = new CustomOverlayWithFocus(getContext(), items, listener);
+        mParcoursOverlay = new CustomOverlayWithFocus(getContext(), parcoursMainBalisesList, listener);
 
         mParcoursOverlay.setFocusItemsOnTap(true);
         mParcoursOverlay.setFocusedItem(0);
@@ -294,7 +292,7 @@ public class OSMFragment extends Fragment {
         mMapView.getOverlays().add(mParcoursOverlay);
     }
 
-    private void addDummyParcours(List<OverlayItem> items) {
+    private void addDummyBalisesToList(List<OverlayItem> items) {
         items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
                 9735936))); // Hannover
         items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin

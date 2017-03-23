@@ -2,11 +2,9 @@ package fr.univ_lille1.iut_info.caronic.mapsv3;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,7 +20,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,33 +27,30 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
+import java.net.Authenticator;
 
 import org.osmdroid.util.GeoPoint;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
+import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
-import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
-import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
+import fr.univ_lille1.iut_info.caronic.mapsv3.volley.VolleySingleton;
 
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_explore;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_feed;
@@ -246,10 +240,10 @@ public class MainActivity extends AppCompatActivity
                 currentTag = TAG_CREATE;
                 fragment = FragmentSearch.newInstance(
                         new MapOptions()
-                        .setEnableLocationOverlay(true)
-                        .setEnableCompass(true)
-                        .setEnableMultiTouchControls(true)
-                        .setEnableScaleOverlay(true));
+                                .setEnableLocationOverlay(true)
+                                .setEnableCompass(true)
+                                .setEnableMultiTouchControls(true)
+                                .setEnableScaleOverlay(true));
             default:
                 Log.w(LOG, "getting fragment but id was incorrect");
                 break;
@@ -450,19 +444,62 @@ public class MainActivity extends AppCompatActivity
 
     public void downloadJson(View view) {
 
-        JsonTask task = new JsonTask();
-        //task.execute("https://10.0.2.2:8080/v1/parcours");
+        /*
+        VolleyLog.DEBUG = true;
 
-        task.execute("http://10.0.2.2:8080/v1/user");
+        final String user = "christopher.caroni";
+        final String pass = "u33zNP$47&u%hXpuHhSi";
+        Authenticator.setDefault(
+                new Authenticator() {
+                    @Override
+                    public PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(user, pass.toCharArray());
+                    }
+                }
+        );
+
+        System.setProperty("http.proxyUser", user);
+        System.setProperty("http.proxyPassword", pass);
+        System.setProperty("https.proxyUser", user);
+        System.setProperty("https.proxyPassword", pass);
+        */
+
+        String url = "http://www.google.com";
+
+
+        Response.Listener<JSONObject> listener = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Toast.makeText(MainActivity.this, "Volley response:" + response.toString(), Toast.LENGTH_SHORT).show();
+            }
+        };
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Volley error", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
+
+        VolleySingleton.getInstance(this).
+
+                addToRequestQueue(jsObjRequest);
+
+
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
         TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
 
-        String jsonParcours = task.getJsonText();
-        if (jsonParcours != null && !jsonParcours.equals("")) {
+        String jsonParcours = "";
+        if (jsonParcours != null && !jsonParcours.equals(""))
+
+        {
             tv.setText(jsonParcours);
             Toast.makeText(this, "" + jsonParcours, Toast.LENGTH_SHORT).show();
             addJsonParcoursToFragment(jsonParcours);
-        } else {
+        } else
+
+        {
             tv.setText("Could not download the run");
         }
 
@@ -473,76 +510,5 @@ public class MainActivity extends AppCompatActivity
         OSMFragment osmFrag = (OSMFragment) setFragToOSMFrag();
         osmFrag.addParcoursjsonParcours(jsonParcours);
     }
-
-    private class JsonTask extends AsyncTask<String, String, String> {
-
-        private String jsonText;
-
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            Toast.makeText(MainActivity.this, "please wait", Toast.LENGTH_SHORT).show();
-        }
-
-        protected String doInBackground(String... params) {
-
-
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-
-            try {
-                URL url = new URL(params[0]);
-                Log.i(LOG, "connection to " + params[0]);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-
-
-                InputStream stream = connection.getInputStream();
-
-                reader = new BufferedReader(new InputStreamReader(stream));
-
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
-
-                }
-
-                return buffer.toString();
-
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Toast.makeText(MainActivity.this, "end execution", Toast.LENGTH_SHORT).show();
-            jsonText = result;
-        }
-
-        public String getJsonText() {
-            return jsonText;
-        }
-    }
-
 
 }

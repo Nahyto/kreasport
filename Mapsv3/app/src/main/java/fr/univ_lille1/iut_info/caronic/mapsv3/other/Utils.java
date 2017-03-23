@@ -21,12 +21,14 @@ import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+import org.osmdroid.views.overlay.mylocation.DirectedLocationOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -38,12 +40,12 @@ import java.util.List;
 
 public class Utils {
 
-    public static void addBalises(ArrayList<OverlayItem> items,String titre, String description, double longitude, double latitude){
+    public static void addBalises(ArrayList<OverlayItem> items, String titre, String description, double longitude, double latitude) {
         items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
     }
 
-    public static void addBalisesToOverlay(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay){
-			/* OnTapListener for the Markers, shows a simple Toast. */
+    public static void addBalisesToOverlay(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay) {
+            /* OnTapListener for the Markers, shows a simple Toast. */
         mMyLocationOverlay.setFocusItemsOnTap(true);
         mMyLocationOverlay.setFocusedItem(0);
         //https://github.com/osmdroid/osmdroid/issues/317
@@ -61,37 +63,23 @@ public class Utils {
     }
 
     @SuppressWarnings({"ResourceType"})
-    public static void goThroughOptions(final Context context, MapView mMapView, MapOptions mMapOptions) {
+    public static void goThroughOptions(final Activity activity, MapView mMapView, MapOptions mMapOptions) {
+
         if (mMapOptions != null) {
             if (mMapOptions.isEnableLocationOverlay()) {
-                LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        Toast.makeText(context, "Update", Toast.LENGTH_SHORT).show();
-                    }
 
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-
-                    }
-                });
-                MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), mMapView);
-                mLocationOverlay.enableMyLocation();
+                DirectedLocationOverlay mLocationOverlay = new DirectedLocationOverlay(activity);
+                mLocationOverlay.setShowAccuracy(true);
                 mMapView.getOverlays().add(mLocationOverlay);
+
+                CustomLocationListener locationListener = new CustomLocationListener(activity, mMapView, mLocationOverlay);
+
+                LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
             }
             if (mMapOptions.isEnableCompass()) {
-                CompassOverlay mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context), mMapView);
+                CompassOverlay mCompassOverlay = new CompassOverlay(activity, new InternalCompassOrientationProvider(activity), mMapView);
                 mCompassOverlay.enableCompass();
                 mMapView.getOverlays().add(mCompassOverlay);
             }
@@ -112,10 +100,13 @@ public class Utils {
             }
         }
     }
+
+
     public static int getPixelsFromDIP(Activity activity, int padding_in_dp) {
         final float scale = activity.getResources().getDisplayMetrics().density;
         return (int) (padding_in_dp * scale + 0.5f);
     }
+
     /**
      * @param boundingBox
      * @return a new BoundingBox reduced by offsets.

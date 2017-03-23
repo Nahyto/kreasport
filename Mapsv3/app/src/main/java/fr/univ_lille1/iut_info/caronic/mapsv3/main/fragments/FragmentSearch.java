@@ -102,7 +102,7 @@ public class FragmentSearch extends Fragment {
         MapView mMapView = new MapView(inflater.getContext());
 
         mMapOptions = (MapOptions) getArguments().getSerializable(KEY_MAP_OPTIONS);
-        Utils.goThroughOptions(getContext(), mMapView, mMapOptions);
+        Utils.goThroughOptions(getActivity(), mMapView, mMapOptions);
         rl.addView(mMapView);
     }
 

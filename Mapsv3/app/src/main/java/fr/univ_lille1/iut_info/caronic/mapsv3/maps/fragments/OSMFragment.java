@@ -1,7 +1,9 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,11 +30,14 @@ import org.osmdroid.views.overlay.TilesOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+import org.osmdroid.views.overlay.mylocation.DirectedLocationOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
@@ -96,6 +101,7 @@ public class OSMFragment extends Fragment {
     }
 
     @Override
+    @SuppressWarnings({"ResourceType"})
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // needs to be called before the MapView is created
         Configuration.getInstance().setMapViewHardwareAccelerated(true);
@@ -110,14 +116,13 @@ public class OSMFragment extends Fragment {
         initParcoursOverlay();
         basicMapSetup();
 
-        Utils.goThroughOptions(getContext(), mMapView, mMapOptions);
+        Utils.goThroughOptions(getActivity(), mMapView, mMapOptions);
         restorePosition();
 
         return mMapView;
     }
 
-
-    /**
+     /**
      * Basic map settings such as hw acceleration, copyright overlay...
      */
     private void basicMapSetup() {

@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity
                 currentID = R.id.nav_explore;
                 if (Build.VERSION.SDK_INT > 22) {
                     if (mWriteExternalStorageGranted) {
-                        setFragToOSMFrag(fragment);
+                        fragment = setFragToOSMFrag();
                     } else {
                         currentTag = TAG_PERMISSIONS_FRAG;
                         fragment = storePermissionsFragment;
@@ -212,7 +213,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 } else {
-                    setFragToOSMFrag(fragment);
+                    fragment = setFragToOSMFrag();
                 }
                 fab.hide();
                 break;
@@ -223,7 +224,8 @@ public class MainActivity extends AppCompatActivity
         return fragment;
     }
 
-    private void setFragToOSMFrag(Fragment fragment) {
+    private Fragment setFragToOSMFrag() {
+        Fragment fragment;
         currentTag = TAG_EXPLORE;
         fragment = storeExploreFragment;
         if (fragment == null) {
@@ -239,6 +241,7 @@ public class MainActivity extends AppCompatActivity
             );
             storeExploreFragment = fragment;
         }
+        return fragment;
     }
 
     private int getFragmentIDByTag(String tag) {
@@ -258,7 +261,6 @@ public class MainActivity extends AppCompatActivity
         if (fragment != null) {
 
             removeOldFragment();
-
             addNewFragmentToContentFrame(fragment, itemId);
         }
     }

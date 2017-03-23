@@ -36,5 +36,4 @@ public interface UserDao {
     @RegisterMapperFactory(BeanMapperFactory.class)
     User findById(@Bind("id") int id);
 
-    void close();
 }

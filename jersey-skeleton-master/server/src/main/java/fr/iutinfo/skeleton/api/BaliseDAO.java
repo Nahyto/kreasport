@@ -1,10 +1,15 @@
 package fr.iutinfo.skeleton.api;
 
-import org.skife.jdbi.v2.sqlobject.*;
+import java.sql.Array;
+import java.util.List;
+
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.BindBean;
+import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import org.skife.jdbi.v2.tweak.BeanMapperFactory;
-
-import java.util.List;
 
 public interface BaliseDAO {
     @SqlUpdate("create table balise (id integer primary key autoincrement, longitude double, latitude double, parcours int, FOREIGN KEY (parcours) REFERENCES parcours(id))")
@@ -36,8 +41,8 @@ public interface BaliseDAO {
     @RegisterMapperFactory(BeanMapperFactory.class)
     Balise findById(@Bind("id") int id);
 
-    @SqlUpdate("update parcours SET balise = :balise where id = :id")
-    void updateBalise(@Bind("id")int id, @Bind("balise") String balise);
+    @SqlUpdate("update balise SET longitude = :longitude , latitude = :latitude  where id = :id")
+    void updateBalise(@Bind("longitude")double longitude, @Bind("latitude") double latitude, @Bind("id") int id);
     
     void close();
 }

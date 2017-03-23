@@ -13,6 +13,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,9 +36,9 @@ public class BaliseResource {
     }
     
     public static void main(String[] args) throws SQLException {
-    	if (tableExist("balise")) {
+    	/*if (tableExist("balise")) {
 			dao.dropBaliseTable();
-		}
+		}*/
 		BaliseResource p = new BaliseResource();
 		//dao.delete(1);dao.delete(2);
 		dao.insert(new Balise(1,5465464.65465464,4654464.454654654,1));
@@ -66,11 +67,14 @@ public class BaliseResource {
 			Statement statement = con.createStatement();
 			rs = statement.executeQuery("select * from balise where parcours = (Select id from parcours where id = "+id+");");
 				while (rs.next()) {
-					balise += " " + rs.getString("id");
+					System.out.println("lol");
+					balise+= " "+rs.getInt("id");
 				}
 			rs.close();
+			System.out.println(balise);
 			Statement statement1 = con.createStatement();
-			statement1.executeUpdate("update parcours SET balise = "+balise+" where id = "+id);
+			statement1.executeUpdate("update parcours SET balise = '"+balise+"' where id = "+id);
+			System.out.println("update parcours SET balise = '"+balise+"' where id = "+id);
 		}catch(SQLException e){
 			e.printStackTrace();
 		}finally{
@@ -78,18 +82,27 @@ public class BaliseResource {
 		}
 	
 		System.out.println(balise);
-		dao.updateBalise(id, balise);
+
+		//dao.updateBalise(id, balise);
     }
 
     @POST
-    public BaliseDto createBalise(BaliseDto dto) {
+    public BaliseDto createBalise(BaliseDto dto) throws SQLException {
         Balise user = new Balise();
         user.initFromDto(dto);
         int id = dao.insert(user);
         dto.setId(id);
+        remplirB(user.getParcours());
         return dto;
     }
-
+    
+    @PUT
+    @Path("/{id}")
+    public void updateBalise(@PathParam("id") int id,BaliseDto dto) throws SQLException {
+        Balise user = new Balise();
+        user.initFromDto(dto);
+        dao.updateBalise(user.getLongitude(), user.getLatitude(), id);
+    }
     @GET
     @Path("/{name}")
     public BaliseDto getBalise(@PathParam("name") String name) {

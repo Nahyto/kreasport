@@ -87,11 +87,12 @@ public class BaliseResource {
     }
 
     @POST
-    public BaliseDto createBalise(BaliseDto dto) {
+    public BaliseDto createBalise(BaliseDto dto) throws SQLException {
         Balise user = new Balise();
         user.initFromDto(dto);
         int id = dao.insert(user);
         dto.setId(id);
+        remplirB(user.getParcours());
         return dto;
     }
 

@@ -11,8 +11,11 @@ public class VolleySingleton {
     private RequestQueue mRequestQueue;
     private static final String TAG = VolleySingleton.class.getSimpleName();
 
+//    private VolleySingleton(Context context) {
+//        mRequestQueue = Volley.newRequestQueue(context, new ProxyHurlStack());
+//    }
     private VolleySingleton(Context context) {
-        mRequestQueue = Volley.newRequestQueue(context, new ProxyHurlStack());
+        mRequestQueue = Volley.newRequestQueue(context);
     }
 
     public static synchronized VolleySingleton getInstance(Context context) {

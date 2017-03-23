@@ -122,7 +122,7 @@ public class OSMFragment extends Fragment {
         return mMapView;
     }
 
-     /**
+    /**
      * Basic map settings such as hw acceleration, copyright overlay...
      */
     private void basicMapSetup() {
@@ -259,13 +259,16 @@ public class OSMFragment extends Fragment {
 
 
     public void addParcoursjsonParcours(String jsonParcours) {
+        jsonParcours = jsonParcours.substring(1, jsonParcours.length() - 1);
         Parcours parcours = new Gson().fromJson(jsonParcours, Parcours.class);
-        Balise premier = parcours.getBaliseList().get(0);
-        GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
-        OverlayItem item = new OverlayItem(parcours.getName(), parcours.getDescription(), point);
-        addBaliseToOverlay(item);
+        if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
+            Balise premier = parcours.getBaliseList().get(0);
+            GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
+            OverlayItem item = new OverlayItem(parcours.getName(), parcours.getDescription(), point);
+            addBaliseToOverlay(item);
 
-        mMapView.invalidate();
+            mMapView.invalidate();
+        }
     }
 
     private void addBaliseToOverlay(OverlayItem item) {
@@ -277,7 +280,7 @@ public class OSMFragment extends Fragment {
         final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
         addDummyParcours(items);
 
-		ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomOverlayWithFocus.getListener(getContext());
+        ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomOverlayWithFocus.getListener(getContext());
         mParcoursOverlay = new CustomOverlayWithFocus(getContext(), items, listener);
 
         mParcoursOverlay.setFocusItemsOnTap(true);

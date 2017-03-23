@@ -32,6 +32,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
@@ -464,13 +465,24 @@ public class MainActivity extends AppCompatActivity
         System.setProperty("https.proxyPassword", pass);
         */
 
-        String url = "http://www.google.com";
+        String url = "http://10.0.2.2:8080/v1/parcours";
 
 
-        Response.Listener<JSONObject> listener = new Response.Listener<JSONObject>() {
+        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        final TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
+        tv.setText("Starting download");
+
+
+        Response.Listener<String> listener = new Response.Listener<String>() {
             @Override
-            public void onResponse(JSONObject response) {
-                Toast.makeText(MainActivity.this, "Volley response:" + response.toString(), Toast.LENGTH_SHORT).show();
+            public void onResponse(String response) {
+                Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
+                if (response != null && !response.equals("")) {
+                    tv.setText(response);
+                    addJsonParcoursToFragment(response);
+                } else {
+                    tv.setText("Could not download the run");
+                }
             }
         };
         Response.ErrorListener errorListener = new Response.ErrorListener() {
@@ -480,30 +492,9 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
+        StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, listener, errorListener);
 
-        VolleySingleton.getInstance(this).
-
-                addToRequestQueue(jsObjRequest);
-
-
-        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
-        TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
-
-        String jsonParcours = "";
-        if (jsonParcours != null && !jsonParcours.equals(""))
-
-        {
-            tv.setText(jsonParcours);
-            Toast.makeText(this, "" + jsonParcours, Toast.LENGTH_SHORT).show();
-            addJsonParcoursToFragment(jsonParcours);
-        } else
-
-        {
-            tv.setText("Could not download the run");
-        }
-
-
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
     private void addJsonParcoursToFragment(String jsonParcours) {

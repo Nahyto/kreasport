@@ -25,7 +25,6 @@ public class Balise implements Principal {
         this.latitude = latitude;
         this.parcours = parcours;
     }
-    //lol mdr
     public Balise() {
     }
 
@@ -78,7 +77,7 @@ public class Balise implements Principal {
 
     @Override
     public String toString() {
-        return id + ": " + longitude + ", " + latitude;
+        return id + ": " + longitude + ", " + latitude +","+parcours;
     }
 
    

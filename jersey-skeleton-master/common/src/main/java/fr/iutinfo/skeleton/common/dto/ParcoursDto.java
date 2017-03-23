@@ -8,7 +8,7 @@ import java.security.Principal;
 public class ParcoursDto implements Principal {
     final static Logger logger = LoggerFactory.getLogger(ParcoursDto.class);
     private String name;
-    private String alias;
+    private String key;
     private String balise;
     private int id = 0;
 
@@ -36,12 +36,12 @@ public class ParcoursDto implements Principal {
         this.balise += " "+balise;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getkey() {
+        return key;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setkey(String key) {
+        this.key = key;
     }
 
 }

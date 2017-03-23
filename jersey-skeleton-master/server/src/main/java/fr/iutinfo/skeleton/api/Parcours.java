@@ -16,49 +16,22 @@ public class Parcours implements Principal {
     final static Logger logger = LoggerFactory.getLogger(Parcours.class);
     //private static Parcours anonymous = new Parcours(-1, "Anonymous", "anonym");
     private String name;
-    private String alias;
+    private String key;
     private int id = 0;
-    private String balise;
+    private String balise = "";
 
     public Parcours(int id, String name) throws SQLException {
         this.id = id;
         this.name = name;
     }
 
-    public Parcours(int id, String name, String alias) throws SQLException {
+    public Parcours(int id, String name, String key) throws SQLException {
         this.id = id;
         this.name = name;
-        this.alias = alias;
+        this.key = key;
     }
     
-   /* public void remplirB() throws SQLException{
-    	Connection con = null;
-		try{  
-			Class.forName("org.sqlite.JDBC");
-		}catch(ClassNotFoundException e){
-			e.printStackTrace();
-		}
-		try{
-			con = DriverManager.getConnection("jdbc:sqlite:" + System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "data.db");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		String[] liste = null;
-		ResultSet rs = null, rs1 = null;
-		try{
-			Statement statement = con.createStatement();
-			rs1 = statement.executeQuery("select * from balise where parcours = (Select id from parcours where name = "+name+");");
-				while (rs.next()) {
-					balise += rs.getString("id");
-				}
-			rs1.close();
-		}catch(SQLException e){
-			e.printStackTrace();
-		}finally{
-			con.close();
-		}
-    }*/
-    
+  
     public Parcours() {
     }
 
@@ -98,20 +71,20 @@ public class Parcours implements Principal {
         if (getClass() != arg.getClass())
             return false;
         Parcours user = (Parcours) arg;
-        return name.equals(user.name) && alias.equals(user.alias);
+        return name.equals(user.name) && key.equals(user.key);
     }
 
     @Override
     public String toString() {
-        return id + ": " + alias + ", " + name;
+        return id + ": " + key + ", " + name +","+balise;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getkey() {
+        return key;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setkey(String key) {
+        this.key = key;
     }
 
   
@@ -133,7 +106,7 @@ public class Parcours implements Principal {
    
 
     public void initFromDto(ParcoursDto dto) {
-        this.setAlias(dto.getAlias());
+        this.setkey(dto.getkey());
         this.setId(dto.getId());
         this.setName(dto.getName());
         this.setBalise(dto.getBalise());
@@ -141,7 +114,7 @@ public class Parcours implements Principal {
 
     public ParcoursDto convertToDto() {
     	ParcoursDto dto = new ParcoursDto();
-        dto.setAlias(this.getAlias());
+        dto.setkey(this.getkey());
         dto.setId(this.getId());
         dto.setName(this.getName());
         dto.setBalise(this.getBalise());

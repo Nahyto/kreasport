@@ -10,7 +10,7 @@ public interface BaliseDAO {
     @SqlUpdate("create table balise (id integer primary key autoincrement, longitude double, latitude double, parcours int, FOREIGN KEY (parcours) REFERENCES parcours(id))")
     void createBaliseTable();
 
-    @SqlUpdate("insert into balise (longitude,latitude) values (:longitude, :latitude)")
+    @SqlUpdate("insert into balise (longitude,latitude,parcours) values (:longitude, :latitude, :parcours)")
     @GetGeneratedKeys
     int insert(@BindBean() Balise balise);
 
@@ -36,5 +36,8 @@ public interface BaliseDAO {
     @RegisterMapperFactory(BeanMapperFactory.class)
     Balise findById(@Bind("id") int id);
 
+    @SqlUpdate("update parcours SET balise = :balise where id = :id")
+    void updateBalise(@Bind("id")int id, @Bind("balise") String balise);
+    
     void close();
 }

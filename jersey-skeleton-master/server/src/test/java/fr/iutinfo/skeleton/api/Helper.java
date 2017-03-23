@@ -10,12 +10,19 @@ import java.util.List;
 public class Helper {
     private final static Logger logger = LoggerFactory.getLogger(Helper.class);
     private static final UserDao dao = BDDFactory.getDbi().open(UserDao.class);
+    private static final ParcoursDao daoP = BDDFactory.getDbi().open(ParcoursDao.class);
+    private static final BaliseDAO daoB = BDDFactory.getDbi().open(BaliseDAO.class);
     static GenericType<List<UserDto>> listUserResponseType = new GenericType<List<UserDto>>() {
     };
 
     public static void initDb() {
         dao.dropUserTable();
+        daoP.dropParcoursTable();
+        daoB.dropBaliseTable();
         dao.createUserTable();
+        daoP.createParcoursTable();
+        daoB.createBaliseTable();
+        
     }
 
     static User createUserWithName(String name) {

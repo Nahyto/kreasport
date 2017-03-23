@@ -21,7 +21,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.CopyrightOverlay;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -35,6 +34,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayWithFocus;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
@@ -54,7 +54,7 @@ public class OSMFragment extends Fragment {
     public static final String KEY_NEW_PARCOURS = "mapsv3.key_new_parcours";
 
     private static GeoPoint initialPoint;
-    private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
+    private ItemizedOverlayWithFocus<OverlayItem> mParcoursOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     protected int zoom;
 
@@ -202,17 +202,17 @@ public class OSMFragment extends Fragment {
 
 			/* OnTapListener for the Markers, shows a simple Toast. */
 
-        mMyLocationOverlay = new CustomOverlayWithFocus(getContext(), items, CustomOverlayWithFocus.getListener(getContext()));
-        mMyLocationOverlay.setFocusItemsOnTap(true);
-        mMyLocationOverlay.setFocusedItem(0);
+        mParcoursOverlay = new CustomOverlayWithFocus(getContext(), items, CustomOverlayWithFocus.getListener(getContext()));
+        mParcoursOverlay.setFocusItemsOnTap(true);
+        mParcoursOverlay.setFocusedItem(0);
         //https://github.com/osmdroid/osmdroid/issues/317
         //you can override the drawing characteristics with this
-        mMyLocationOverlay.setMarkerBackgroundColor(Color.BLUE);
-        mMyLocationOverlay.setMarkerTitleForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setDescriptionBoxPadding(15);
+        mParcoursOverlay.setMarkerBackgroundColor(Color.BLUE);
+        mParcoursOverlay.setMarkerTitleForegroundColor(Color.WHITE);
+        mParcoursOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
+        mParcoursOverlay.setDescriptionBoxPadding(15);
 
-        mMapView.getOverlays().add(mMyLocationOverlay);
+        mMapView.getOverlays().add(mParcoursOverlay);
 
         mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
         mRotationGestureOverlay.setEnabled(false);
@@ -285,9 +285,16 @@ public class OSMFragment extends Fragment {
 
     public void addParcoursjsonParcours(String jsonParcours) {
         Parcours parcours = new Gson().fromJson(jsonParcours, Parcours.class);
+        Balise premier = parcours.getBaliseList().get(0);
+        GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
+        OverlayItem item = new OverlayItem(parcours.getName(), parcours.getDescription(), point);
+        addbaliseToOverlay(item);
 
-        // TODO add to list
+        mMapView.invalidate();
+    }
 
+    private void addbaliseToOverlay(OverlayItem item) {
+        mParcoursOverlay.addItem(item);
         mMapView.invalidate();
     }
 }

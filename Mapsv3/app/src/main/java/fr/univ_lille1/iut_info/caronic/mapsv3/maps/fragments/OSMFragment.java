@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.other.ItemizeIconOverlay;
 import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
 
 /**
@@ -52,9 +53,9 @@ public class OSMFragment extends Fragment {
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
-    private final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
     protected int zoom;
 
+    private final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
     private MapView mMapView;
     private MapOptions mMapOptions;
 
@@ -85,9 +86,6 @@ public class OSMFragment extends Fragment {
         return fragment;
     }
 
-    public void searchView(){
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,7 +106,8 @@ public class OSMFragment extends Fragment {
         // set default location to the one specified on newInstance. Will still animate/move to last saved location after.
         // This is in case there is a delay in acquiring current/last position
         mMapView.getController().setCenter(initialPoint);
-        addBalises();
+        mLocationNewOverlay = new  ItemizedOverlayWithFocus(getContext(),items, ItemizeIconOverlay())
+        Utils.addBalises(items,mLocationNewOverlay,mMapView,mRotationGestureOverlay);
         basicMapSetup();
 
         Utils.goThroughOptions(getContext(),mMapView,mMapOptions);
@@ -131,50 +130,6 @@ public class OSMFragment extends Fragment {
         x.setOvershootTileCache(x.getOvershootTileCache() * 2);
 
         mMapView.setTilesScaledToDpi(true);
-    }
-
-    public void addBalisesTmp(String titre, String description, double longitude, double latitude){
-        items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
-    }
-
-    public void addBalises(){
-        Context context = getActivity();// San Francisco
-
-			/* OnTapListener for the Markers, shows a simple Toast. */
-        mMyLocationOverlay = new ItemizedOverlayWithFocus<>(items,
-                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                    @Override
-                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                getContext(),
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got single tapped up", Toast.LENGTH_LONG).show();
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onItemLongPress(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                getContext(),
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got long pressed", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                }, context);
-        mMyLocationOverlay.setFocusItemsOnTap(true);
-        mMyLocationOverlay.setFocusedItem(0);
-        //https://github.com/osmdroid/osmdroid/issues/317
-        //you can override the drawing characteristics with this
-        mMyLocationOverlay.setMarkerBackgroundColor(Color.BLUE);
-        mMyLocationOverlay.setMarkerTitleForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setDescriptionBoxPadding(15);
-
-        mMapView.getOverlays().add(mMyLocationOverlay);
-
-        mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-        mRotationGestureOverlay.setEnabled(false);
-        mMapView.getOverlays().add(mRotationGestureOverlay);
     }
 
     @Override

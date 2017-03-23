@@ -20,7 +20,8 @@
             <div class="panel-body">
               Id : ${it.id}<br/>
               Nom : ${it.name}<br/>
-              alias : ${it.alias} <br/>
+              clef : ${it.key} <br/>
+              Balises : ${it.balise}<br/>
             </div>
           </div>
         </div>

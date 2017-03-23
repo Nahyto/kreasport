@@ -8,18 +8,9 @@ import java.security.Principal;
 public class ParcoursDto implements Principal {
     final static Logger logger = LoggerFactory.getLogger(ParcoursDto.class);
     private String name;
-    private String alias;
+    private String key;
+    private String balise;
     private int id = 0;
-    private String email;
-    private String password;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public int getId() {
         return id;
@@ -36,21 +27,21 @@ public class ParcoursDto implements Principal {
     public void setName(String name) {
         this.name = name;
     }
-
-    public String getPassword() {
-        return this.password;
+    
+    public String getBalise() {
+        return balise;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setBalise(String balise) {
+        this.balise += " "+balise;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getkey() {
+        return key;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setkey(String key) {
+        this.key = key;
     }
 
 }

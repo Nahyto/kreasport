@@ -3,6 +3,7 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.*;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -11,13 +12,19 @@ import android.widget.Toast;
 
 import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.ArrayList;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
@@ -26,6 +33,29 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
  */
 
 public class Utils {
+
+    public static void addBalisesToOverlay(ArrayList<OverlayItem> items,String titre, String description, double longitude, double latitude){
+        items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
+    }
+
+    public static void addBalises(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay){
+			/* OnTapListener for the Markers, shows a simple Toast. */
+        mMyLocationOverlay.setFocusItemsOnTap(true);
+        mMyLocationOverlay.setFocusedItem(0);
+        //https://github.com/osmdroid/osmdroid/issues/317
+        //you can override the drawing characteristics with this
+        mMyLocationOverlay.setMarkerBackgroundColor(Color.BLUE);
+        mMyLocationOverlay.setMarkerTitleForegroundColor(Color.WHITE);
+        mMyLocationOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
+        mMyLocationOverlay.setDescriptionBoxPadding(15);
+
+        mMapView.getOverlays().add(mMyLocationOverlay);
+
+        mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
+        mRotationGestureOverlay.setEnabled(false);
+        mMapView.getOverlays().add(mRotationGestureOverlay);
+    }
+
     @SuppressWarnings({"ResourceType"})
     public static void goThroughOptions(final Context context, MapView mMapView, MapOptions mMapOptions) {
         if (mMapOptions != null) {

@@ -1,41 +1,48 @@
 package fr.iutinfo.skeleton.api;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
+import java.security.Principal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import fr.iutinfo.skeleton.common.dto.ParcoursDto;
-import fr.iutinfo.skeleton.common.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.Principal;
-import java.security.SecureRandom;
+import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 
 public class Parcours implements Principal {
     final static Logger logger = LoggerFactory.getLogger(Parcours.class);
     //private static Parcours anonymous = new Parcours(-1, "Anonymous", "anonym");
     private String name;
-    private String alias;
+    private String key;
     private int id = 0;
+    private String balise = "";
 
-    public Parcours(int id, String name) {
+    public Parcours(int id, String name) throws SQLException {
         this.id = id;
         this.name = name;
     }
 
-    public Parcours(int id, String name, String alias) {
+    public Parcours(int id, String name, String key) throws SQLException {
         this.id = id;
         this.name = name;
-        this.alias = alias;
+        this.key = key;
     }
-    //lol mdr
+    
+  
     public Parcours() {
     }
 
- /*   public static Parcours getAnonymousUser() {
-        return anonymous;
-    }*/
+    public String getBalise(){
+    	return balise;
+    }
+    
+    public void setBalise(String b){
+    	balise += " "+b;
+    }
+    
 
 
     public int getId() {
@@ -64,20 +71,20 @@ public class Parcours implements Principal {
         if (getClass() != arg.getClass())
             return false;
         Parcours user = (Parcours) arg;
-        return name.equals(user.name) && alias.equals(user.alias);
+        return name.equals(user.name) && key.equals(user.key);
     }
 
     @Override
     public String toString() {
-        return id + ": " + alias + ", " + name;
+        return id + ": " + key + ", " + name +","+balise;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getkey() {
+        return key;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setkey(String key) {
+        this.key = key;
     }
 
   
@@ -99,16 +106,18 @@ public class Parcours implements Principal {
    
 
     public void initFromDto(ParcoursDto dto) {
-        this.setAlias(dto.getAlias());
+        this.setkey(dto.getkey());
         this.setId(dto.getId());
         this.setName(dto.getName());
+        this.setBalise(dto.getBalise());
     }
 
-    public UserDto convertToDto() {
-        UserDto dto = new UserDto();
-        dto.setAlias(this.getAlias());
+    public ParcoursDto convertToDto() {
+    	ParcoursDto dto = new ParcoursDto();
+        dto.setkey(this.getkey());
         dto.setId(this.getId());
         dto.setName(this.getName());
+        dto.setBalise(this.getBalise());
         return dto;
     }
 }

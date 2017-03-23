@@ -13,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,7 +26,6 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.adapter.DownloadedItemAdapter;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.adapter.DownloadedItemModel;
 
-import static android.content.Context.MODE_PRIVATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity.mWriteExternalStorageGranted;
 

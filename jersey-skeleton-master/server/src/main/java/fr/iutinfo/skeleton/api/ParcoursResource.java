@@ -1,18 +1,32 @@
 package fr.iutinfo.skeleton.api;
 
-import fr.iutinfo.skeleton.common.dto.ParcoursDto;
-import fr.iutinfo.skeleton.common.dto.UserDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static fr.iutinfo.skeleton.api.BDDFactory.getDbi;
+import static fr.iutinfo.skeleton.api.BDDFactory.tableExist;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fr.iutinfo.skeleton.api.BDDFactory.getDbi;
-import static fr.iutinfo.skeleton.api.BDDFactory.tableExist;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 
 @Path("/parcours")
 @Produces(MediaType.APPLICATION_JSON)
@@ -29,11 +43,16 @@ public class ParcoursResource {
         }
     }
     
-    /*public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException {
+    	/*if (tableExist("parcours")) {
+			dao.dropParcoursTable();
+		}*/
 		ParcoursResource p = new ParcoursResource();
-		dao.insert(new Parcours(42, "lojkll", "mdr"));
 		System.out.println(dao.all());
-	}*/
+	}
+    
+  
+    
 
     @POST
     public ParcoursDto createParcours(ParcoursDto dto) {
@@ -46,7 +65,7 @@ public class ParcoursResource {
 
     @GET
     @Path("/{name}")
-    public UserDto getParcours(@PathParam("name") String name) {
+    public ParcoursDto getParcours(@PathParam("name") String name) {
         Parcours user = dao.findByName(name);
         if (user == null) {
             throw new WebApplicationException(404);
@@ -55,7 +74,7 @@ public class ParcoursResource {
     }
 
     @GET
-    public List<UserDto> getAllParcours(@QueryParam("q") String query) {
+    public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {
         List<Parcours> users;
         if (query == null) {
             users = dao.all();

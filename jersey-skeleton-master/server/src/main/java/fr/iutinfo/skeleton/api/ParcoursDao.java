@@ -7,10 +7,10 @@ import org.skife.jdbi.v2.tweak.BeanMapperFactory;
 import java.util.List;
 
 public interface ParcoursDao {
-    @SqlUpdate("create table parcours (id integer primary key autoincrement, name varchar(100), alias varchar(100))")
+    @SqlUpdate("create table parcours (id integer primary key autoincrement, name varchar(100), key varchar(100), balise varchar(100))")
     void createParcoursTable();
 
-    @SqlUpdate("insert into parcours (name,alias) values (:name, :alias)")
+    @SqlUpdate("insert into parcours (name,key) values (:name, :key)")
     @GetGeneratedKeys
     int insert(@BindBean() Parcours parcours);
 
@@ -35,6 +35,8 @@ public interface ParcoursDao {
     @SqlQuery("select * from parcours where id = :id")
     @RegisterMapperFactory(BeanMapperFactory.class)
     Parcours findById(@Bind("id") int id);
+    
+   
 
     void close();
 }

@@ -26,12 +26,17 @@
     <string name="offline_area_selection_notification_start">Starting download of %s</string>
 
 
-    <string name="fragment_permissions_title">Uh oh!</string>
-    <string name="fragment_permissions_sub_title">We need the following permissions to display the map:</string>
+    <string name="fragment_permissions_title">Oh no!</string>
+    <string name="fragment_permissions_sub_title">We need the following permissions before we can display the map:</string>
     <string name="activity_explore_title">Explore</string>
     <string name="activity_home_title">Home</string>
     <string name="osm_fragment_first_run_location_info">Getting current location...</string>
     <string name="offline_areas_no_areas_info">You haven\'t downloaded any areas yet</string>
     <string name="settings_title">Settings</string>
     <string name="help_title">Help</string>
+    <string name="permission_request_button_text">Approve</string>
+
+    <!-- Permissions -->
+    <string name="permission_write_external_storage_title">Write to external storage</string>
+    <string name="permission_access_fine_location_title">Access fine location</string>
 </resources>

@@ -8,15 +8,25 @@
 </head>
 <body>
 
-<div id="floating-panel">
-      <input onclick="clearMarkers();" type=button value="Cacher les balises">
-      <input onclick="showMarkers();" type=button value="Afficher les balises">
-      <input onclick="deleteLastMarker();" type=button value="Supprimer la derniere balise">
+	<div id="floating-panel">
+    	<input onclick="clearMarkers();" type=button value="Cacher les balises">
+      	<input onclick="showMarkers();" type=button value="Afficher les balises">
+      	<input onclick="deleteLastMarker();" type=button value="Supprimer la derniere balise">
+    </div>
+
+    <div id="distance">
+    	<p >Distance totale : <span id="total">0 </span> m</p>
     </div>
 
 
 	<div id="map"></div>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAylZjXqSUAwgQigsKVOz_0M_U5kN8LmGE&callback=initMap"></script>
+
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAylZjXqSUAwgQigsKVOz_0M_U5kN8LmGE&callback=initMap&libraries=geometry">
+	</script>
+
+	<div id="valider">
+		<input onclick="sendToServ();" type=button value="Valider le parcours">
+	</div>
 
 </body>
 </html>

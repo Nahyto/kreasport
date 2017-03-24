@@ -11,10 +11,10 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import org.skife.jdbi.v2.tweak.BeanMapperFactory;
 
 public interface BaliseDAO {
-    @SqlUpdate("create table balise (id integer primary key autoincrement, longitude double, latitude double, parcours int, FOREIGN KEY (parcours) REFERENCES parcours(id))")
+    @SqlUpdate("create table balise (id integer primary key autoincrement, longitude double, latitude double,description TEXT, parcours int, FOREIGN KEY (parcours) REFERENCES parcours(id))")
     void createBaliseTable();
 
-    @SqlUpdate("insert into balise (longitude,latitude,parcours) values (:longitude, :latitude, :parcours)")
+    @SqlUpdate("insert into balise (longitude,latitude,description,parcours) values (:longitude, :latitude,:description, :parcours)")
     @GetGeneratedKeys
     int insert(@BindBean() Balise balise);
 
@@ -44,8 +44,8 @@ public interface BaliseDAO {
     @RegisterMapperFactory(BeanMapperFactory.class)
     Balise findById(@Bind("id") int id);
 
-    @SqlUpdate("update balise SET longitude = :longitude , latitude = :latitude  where id = :id")
-    void updateBalise(@Bind("longitude")double longitude, @Bind("latitude") double latitude, @Bind("id") int id);
+    @SqlUpdate("update balise SET longitude = :longitude , latitude = :latitude, description = :description  where id = :id")
+    void updateBalise(@Bind("longitude")double longitude, @Bind("latitude") double latitude,@Bind("description")String Description, @Bind("id") int id);
     
     void close();
 }

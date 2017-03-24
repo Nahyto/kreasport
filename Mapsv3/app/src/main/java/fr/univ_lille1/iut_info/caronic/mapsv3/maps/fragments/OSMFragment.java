@@ -1,6 +1,8 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -37,6 +39,8 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayWithFocus;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.YourReceiver;
+import fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants;
 import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
 
 /**
@@ -59,6 +63,7 @@ public class OSMFragment extends Fragment {
     private static GeoPoint initialPoint;
     private ItemizedOverlayWithFocus<OverlayItem> mParcoursOverlay;
     protected int zoom;
+    private ArrayList<Parcours> listeParcours;
 
     private MapView mMapView;
     private MapOptions mMapOptions;
@@ -170,6 +175,12 @@ public class OSMFragment extends Fragment {
         if (getArguments().getBoolean(KEY_FIRST_RUN)) {
             Toast.makeText(getContext(), R.string.osm_fragment_first_run_location_info, Toast.LENGTH_SHORT).show();
             LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+            Intent intent = new Intent(Constants.ACTION_PROXIMITY_ALERT);
+            PendingIntent pendingIntent = PendingIntent.getService(getContext(), 0, intent, 0);
+            locationManager.addProximityAlert(50.6137196,3.1367387,1000,-1,pendingIntent);
+            YourReceiver received = new YourReceiver();
+            received.onReceive(getContext(),intent);
             locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -192,11 +203,12 @@ public class OSMFragment extends Fragment {
 
                 }
             }, null);
+            //for (Parcours p: listeParcours) {
+           // }
         } else if (!getArguments().getBoolean(KEY_FIRST_RUN) && initialPoint != null) {
             mapController.animateTo(initialPoint);
         }
     }
-
 
     /**
      * ONLY CALL IF ONCREATEVIEW ALREADY CALLED, OTHERWISE USE FRAGMENT ARGUMENTS
@@ -215,7 +227,7 @@ public class OSMFragment extends Fragment {
             Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
             if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
                 Log.d(LOG, "creating new parcours");
-
+                listeParcours.add(parcours);
                 Balise premier = parcours.getBaliseList().get(0);
                 GeoPoint point = new GeoPoint(premier.getLatitude(), premier.getLongitude());
                 OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
@@ -288,14 +300,12 @@ public class OSMFragment extends Fragment {
         mParcoursOverlay.setMarkerTitleForegroundColor(Color.WHITE);
         mParcoursOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
         mParcoursOverlay.setDescriptionBoxPadding(15);
-
         mMapView.getOverlays().add(mParcoursOverlay);
     }
 
     private void addDummyBalisesToList(List<OverlayItem> items) {
-        items.add(new OverlayItem("Hannover", "Tiny SampleDescription", new GeoPoint(52370816,
-                9735936))); // Hannover
-        items.add(new OverlayItem("Berlin", "This is a relatively short SampleDescription.", new GeoPoint(52518333, 13408333))); // Berlin
+        items.add(new OverlayItem("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196,3.1367387)));
+        items.add(new OverlayItem("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613014, 3.138510))); // Berlin
         items.add(new OverlayItem(
                 "Washington",
                 "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington

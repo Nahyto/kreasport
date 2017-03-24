@@ -12,10 +12,19 @@ public class ParcoursDto implements Principal {
     private String key;
     private String balise;
 	private List<BaliseDto> baliseDtoList;
+	private String description;
     private int id = 0;
 
 	public ParcoursDto() {
 		baliseDtoList = new ArrayList<>();
+	}
+	
+	public String getDescription(){
+		return description;
+	}
+	
+	public void setDescription(String description){
+		this.description = description;
 	}
 
     public int getId() {

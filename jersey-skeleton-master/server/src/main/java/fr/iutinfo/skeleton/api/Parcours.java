@@ -19,6 +19,7 @@ public class Parcours implements Principal {
 	private int id = 0;
 	private String balise = "";
 	private List<Balise> baliseList;
+	private String description = "";
 
 	public Parcours(int id, String name) throws SQLException {
 		this.id = id;
@@ -33,6 +34,15 @@ public class Parcours implements Principal {
 
 	public Parcours() {
 	}
+
+	public String getDescription(){
+		return description;
+	}
+
+	public void setDescription(String desc){
+		this.description = desc;
+	}
+
 
 	public String getBalise() {
 		return balise;
@@ -84,7 +94,7 @@ public class Parcours implements Principal {
 
 	@Override
 	public String toString() {
-		return id + ": " + key + ", " + name + "," + balise;
+		return id + ": " + key + ", " + name + "," + description;
 	}
 
 	public String getkey() {

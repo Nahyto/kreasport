@@ -18,12 +18,14 @@ public class Balise implements Principal {
     private double latitude;
     private int parcours;
     private int id = 0;
+    private String description = "";
 
-    public Balise(int id, double longitude, double latitude, int parcours) {
+    public Balise(int id, double longitude, double latitude, String description, int parcours) {
         this.id = id;
         this.longitude = longitude;
         this.latitude = latitude;
         this.parcours = parcours;
+        this.description = description;
     }
     public Balise() {
     }
@@ -31,7 +33,14 @@ public class Balise implements Principal {
  /*   public static Balise getAnonymousBalise() {
         return anonymous;
     }*/
-
+    
+    public String getDescription(){
+    	return description;
+    }
+    
+    public void setDescription(String desc){
+    	this.description = desc;
+    }
 
     public int getId() {
         return id;
@@ -105,6 +114,7 @@ public class Balise implements Principal {
         this.setId(dto.getId());
         this.setLongitude(dto.getLongitude());
         this.setParcours(dto.getParcours());
+        this.setDescription(dto.getDescription());
     }
 
     public BaliseDto convertToDto() {
@@ -113,6 +123,7 @@ public class Balise implements Principal {
         dto.setLatitude(this.getLatitude());
         dto.setLongitude(this.getLongitude());
         dto.setParcours(this.getParcours());
+        dto.setDescription(this.getDescription());
         return dto;
     }
 	@Override

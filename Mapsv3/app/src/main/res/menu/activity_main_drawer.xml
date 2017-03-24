@@ -6,12 +6,6 @@
         android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_create"
-            android:title="Search"
-
-            android:checkable="true"
-            />
-        <item
             android:id="@+id/nav_feed"
             android:icon="@drawable/ic_home_black_24px"
             android:checked="true"

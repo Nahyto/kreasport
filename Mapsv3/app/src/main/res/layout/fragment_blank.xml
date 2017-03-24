@@ -15,7 +15,7 @@
             android:text="@string/hello_blank_fragment" />
 
         <Button
-            android:onClick="downloadJsonDummy"
+            android:onClick="downloadJson"
             android:id="@+id/download_button"
             android:text="download json"
             android:layout_width="wrap_content"

@@ -1,5 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -10,6 +12,7 @@ public class Parcours extends BaseItem {
 
     private String description;
     private String key;
+    @SerializedName("baliseDtoList")
     private List<Balise> baliseList;
 
     public Parcours(String title) {

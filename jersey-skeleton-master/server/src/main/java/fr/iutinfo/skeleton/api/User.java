@@ -167,7 +167,7 @@ public class User implements Principal {
 
     public UserDto convertToDto() {
         UserDto dto = new UserDto();
-        dto.setAlias(this.getAlias());
+        dto.setAlias(this.getAlias	());
         dto.setEmail(this.getEmail());
         dto.setId(this.getId());
         dto.setName(this.getName());

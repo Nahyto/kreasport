@@ -68,11 +68,11 @@ public class ParcoursResource {
         parcours.initFromDto(dto);
         dao.updateParcours(parcours.getName(), parcours.getkey(), id);
     }
-
+    
     @GET
-    @Path("/{name}")
-    public ParcoursDto getParcours(@PathParam("name") String name) {
-        Parcours user = dao.findByName(name);
+    @Path("/{id}")
+    public ParcoursDto getParcoursId(@PathParam("id") int id) {
+        Parcours user = dao.findById(id);
         if (user == null) {
             throw new WebApplicationException(404);
         }

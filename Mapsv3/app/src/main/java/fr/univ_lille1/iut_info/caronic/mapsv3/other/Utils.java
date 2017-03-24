@@ -2,12 +2,14 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.*;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -41,6 +43,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.List;
 
+import static android.R.id.primary;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS;
 
 /**
@@ -81,9 +84,9 @@ public class Utils {
     /**
      * @return a list of {@link OverlayItem} if this fragment's arguments contain any
      */
-    public static List<OverlayItem> getOverlayFromArguments(Bundle args) {
-        String parcoursStringArray = args.getString(KEY_PARCOURS);
-        if (parcoursStringArray != null) {
+    public static List<OverlayItem> getOverlayFromPreferences(SharedPreferences preferences) {
+        String parcoursStringArray = preferences.getString(KEY_PARCOURS, "");
+        if (!parcoursStringArray.equals("")) {
             return jsonArrayToOverlayItemList(parcoursStringArray);
         }
         return null;
@@ -110,6 +113,7 @@ public class Utils {
                 OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
 
                 overlayItemsFromArgsList.add(item);
+                Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
             } else {
                 Log.d(LOG, "no balises found in that parcours");
             }

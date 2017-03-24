@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -46,7 +45,7 @@ import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.LOCATION_IU
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_DISTANCECHANGE_FOR_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_TIME_BETWEEN_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.addDummyBalisesToList;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getOverlayFromArguments;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getOverlayFromPreferences;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -336,10 +335,12 @@ public class OSMFragment extends Fragment {
 
         addDummyBalisesToList(firstBalisesInParcoursList);
 
-        List<OverlayItem> parcoursFromJson = getOverlayFromArguments(getArguments());
+        List<OverlayItem> parcoursFromJson = getOverlayFromPreferences(getActivity().getPreferences(Context.MODE_PRIVATE));
         if (parcoursFromJson != null) {
             firstBalisesInParcoursList.addAll(parcoursFromJson);
         }
+
+        Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " primary balises");
 
         ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomItemizedIconOverlay.getListener(getContext());
         mParcoursOverlay = new CustomItemizedIconOverlay(getContext(), firstBalisesInParcoursList, listener);

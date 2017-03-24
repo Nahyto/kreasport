@@ -1,6 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -447,9 +448,10 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
                 if (response != null && !response.equals("")) {
                     tv.setText(response);
-                    addJsonParcoursToFragment(response);
+                    saveJsonParcoursToPreferences(response);
+                    displaySelectedScreen(R.id.nav_explore);
                 } else {
-                    tv.setText("Could not download the run");
+                    tv.setText("Could not download the parcours");
                 }
             }
         };
@@ -469,15 +471,12 @@ public class MainActivity extends AppCompatActivity
      * Adds the json string to OSMFragment's arguments so they'll be loading in onCreateView automatically
      * @param jsonParcours
      */
-    private void addJsonParcoursToFragment(String jsonParcours) {
-        OSMFragment osmFrag = (OSMFragment) restoreOrCreateOSMFragment();
-
-        Bundle fragArgs = osmFrag.getArguments();
-        fragArgs.putString(KEY_PARCOURS, jsonParcours);;
-
-        osmFrag.setArguments(fragArgs);
-
-        displaySelectedScreen(R.id.nav_explore);
+    @SuppressLint("ApplySharedPref")
+    private void saveJsonParcoursToPreferences(String jsonParcours) {
+        getPreferences(MODE_PRIVATE)
+                .edit()
+                .putString(KEY_PARCOURS, jsonParcours)
+                .commit();
     }
 
     public void downloadJsonDummy(View view) {
@@ -488,7 +487,7 @@ public class MainActivity extends AppCompatActivity
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
         final TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
         tv.setText(dummy);
-        addJsonParcoursToFragment(dummy);
+        saveJsonParcoursToPreferences(dummy);
     }
 
     private String getDummyParcoursJsonString() {

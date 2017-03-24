@@ -36,7 +36,7 @@ public interface BaliseDAO {
     @RegisterMapperFactory(BeanMapperFactory.class)
     List<Balise> all();
 
-	@SqlUpdate("select * balise where parcours = :parcours")
+	@SqlUpdate("select * from balise where parcours = :parcours")
 	@RegisterMapperFactory(BeanMapperFactory.class)
 	List<Balise> allFromParcours(@Bind("parcours") int parcours);
 

@@ -86,7 +86,8 @@ public class ParcoursResource {
         if (query == null) {
 			parcoursList = dao.all();
 			for (Parcours parcours : parcoursList) {
-				parcours.setBaliseList(daoBalise.allFromParcours(parcours.getId()));
+				List<Balise> baliseList = daoBalise.allFromParcours(parcours.getId());
+				parcours.setBaliseList(baliseList);
 			}
         } else {
             logger.debug("Search users with query: " + query);

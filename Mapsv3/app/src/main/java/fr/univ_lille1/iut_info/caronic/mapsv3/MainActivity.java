@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.BlankFragment;
-import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.FragmentSearch;
 import fr.univ_lille1.iut_info.caronic.mapsv3.main.fragments.PermissionsFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
@@ -238,15 +237,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 fab.hide();
                 break;
-            case R.id.nav_create:
-                currentID = R.id.nav_create;
-                currentTag = TAG_CREATE;
-                fragment = FragmentSearch.newInstance(
-                        new MapOptions()
-                                .setEnableLocationOverlay(true)
-                                .setEnableCompass(true)
-                                .setEnableMultiTouchControls(true)
-                                .setEnableScaleOverlay(true));
             default:
                 Log.w(LOG, "getting fragment but id was incorrect");
                 break;
@@ -317,18 +307,6 @@ public class MainActivity extends AppCompatActivity
                 Log.d(LOG, "added to content_frame with " + fragment.getTag());
                 break;
             case nav_explore:
-                // here we add to content_frame so that a back press will go backwards in the stack instead of exiting the app.
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .add(R.id.content_frame, fragment, currentTag)
-                        .addToBackStack(currentTag)
-                        .commit();
-
-                Log.d(LOG, "added to content_frame with " + fragment.getTag());
-                getSupportFragmentManager().executePendingTransactions();
-                break;
-            case R.id.nav_create:
                 // here we add to content_frame so that a back press will go backwards in the stack instead of exiting the app.
                 getSupportFragmentManager()
                         .beginTransaction()

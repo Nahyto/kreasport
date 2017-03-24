@@ -30,6 +30,7 @@ import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 public class ParcoursResource {
     final static Logger logger = LoggerFactory.getLogger(ParcoursResource.class);
     private static ParcoursDao dao = getDbi().open(ParcoursDao.class);
+    private static BaliseDAO daoBalise = getDbi().open(BaliseDAO.class);
 
     public ParcoursResource() throws SQLException {
         if (!tableExist("parcours")) {
@@ -81,14 +82,17 @@ public class ParcoursResource {
 
     @GET
     public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {
-        List<Parcours> users;
+        List<Parcours> parcoursList;
         if (query == null) {
-			users = dao.allWithBalises();
+			parcoursList = dao.all();
+			for (Parcours parcours : parcoursList) {
+				parcours.setBaliseList(daoBalise.allFromParcours(parcours.getId()));
+			}
         } else {
             logger.debug("Search users with query: " + query);
-            users = dao.search("%" + query + "%");
+            parcoursList = dao.search("%" + query + "%");
         }
-        return users.stream().map(Parcours::convertToDto).collect(Collectors.toList());
+        return parcoursList.stream().map(Parcours::convertToDto).collect(Collectors.toList());
     }
     
     @GET

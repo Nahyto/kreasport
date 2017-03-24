@@ -1,6 +1,5 @@
 package fr.iutinfo.skeleton.api;
 
-import java.sql.Array;
 import java.util.List;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
@@ -36,6 +35,10 @@ public interface BaliseDAO {
     @SqlQuery("select * from balise order by id")
     @RegisterMapperFactory(BeanMapperFactory.class)
     List<Balise> all();
+
+	@SqlUpdate("select * balise where parcours = :parcours")
+	@RegisterMapperFactory(BeanMapperFactory.class)
+	List<Balise> allFromParcours(@Bind("parcours") int parcours);
 
     @SqlQuery("select * from balise where id = :id")
     @RegisterMapperFactory(BeanMapperFactory.class)

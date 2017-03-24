@@ -44,4 +44,8 @@ public class Parcours extends BaseItem {
         this.baliseList = baliseList;
     }
 
+    public Balise getPrimaryBalise() {
+        return baliseList.get(0);
+    }
+
 }

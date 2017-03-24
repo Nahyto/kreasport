@@ -432,27 +432,8 @@ public class MainActivity extends AppCompatActivity
 
     public void downloadJson(View view) {
 
-        /*
-        VolleyLog.DEBUG = true;
-
-        final String user = "christopher.caroni";
-        final String pass = "u33zNP$47&u%hXpuHhSi";
-        Authenticator.setDefault(
-                new Authenticator() {
-                    @Override
-                    public PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(user, pass.toCharArray());
-                    }
-                }
-        );
-
-        System.setProperty("http.proxyUser", user);
-        System.setProperty("http.proxyPassword", pass);
-        System.setProperty("https.proxyUser", user);
-        System.setProperty("https.proxyPassword", pass);
-        */
-
-        String url = "http://172.18.49.102:8080/v1/parcours";
+//        String url = "http://172.18.49.102:8080/v1/parcours";
+        String url = "http://10.0.2.2:8080/v1/parcours";
 
 
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);

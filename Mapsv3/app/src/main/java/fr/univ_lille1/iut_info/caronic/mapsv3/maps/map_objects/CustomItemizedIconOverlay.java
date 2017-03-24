@@ -13,13 +13,13 @@ import java.util.List;
  * Created by Chris on 23-Mar-17.
  */
 
-public class CustomOverlayWithFocus<Item extends OverlayItem> extends ItemizedOverlayWithFocus<Item> {
+public class CustomItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlayWithFocus<Item> {
 
     private Context context;
     private List listItems;
 
 
-    public CustomOverlayWithFocus(Context pContext, List aList, OnItemGestureListener aOnItemTapListener) {
+    public CustomItemizedIconOverlay(Context pContext, List aList, OnItemGestureListener aOnItemTapListener) {
         super(pContext, aList, aOnItemTapListener);
 
         this.context = pContext;

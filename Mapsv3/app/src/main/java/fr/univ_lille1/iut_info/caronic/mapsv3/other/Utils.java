@@ -8,7 +8,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
@@ -27,6 +33,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 import org.osmdroid.views.overlay.OverlayItem;
@@ -34,73 +41,15 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.List;
 
+import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS;
+
 /**
  * Created by Christopher Caroni on 17/03/2017.
  */
 
 public class Utils {
 
-    public static void addBalises(ArrayList<OverlayItem> items, String titre, String description, double longitude, double latitude) {
-        items.add(new OverlayItem(titre, description, new GeoPoint(longitude, latitude)));
-    }
-
-    public static void addBalisesToOverlay(ArrayList<OverlayItem> items, ItemizedOverlayWithFocus mMyLocationOverlay, MapView mMapView, RotationGestureOverlay mRotationGestureOverlay) {
-            /* OnTapListener for the Markers, shows a simple Toast. */
-        mMyLocationOverlay.setFocusItemsOnTap(true);
-        mMyLocationOverlay.setFocusedItem(0);
-        //https://github.com/osmdroid/osmdroid/issues/317
-        //you can override the drawing characteristics with this
-        mMyLocationOverlay.setMarkerBackgroundColor(Color.BLUE);
-        mMyLocationOverlay.setMarkerTitleForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setMarkerDescriptionForegroundColor(Color.WHITE);
-        mMyLocationOverlay.setDescriptionBoxPadding(15);
-
-        mMapView.getOverlays().add(mMyLocationOverlay);
-
-        mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-        mRotationGestureOverlay.setEnabled(false);
-        mMapView.getOverlays().add(mRotationGestureOverlay);
-    }
-
-    @SuppressWarnings({"ResourceType"})
-    public static void goThroughOptions(final Activity activity, MapView mMapView, MapOptions mMapOptions) {
-
-        if (mMapOptions != null) {
-            if (mMapOptions.isEnableLocationOverlay()) {
-
-                DirectedLocationOverlay mLocationOverlay = new DirectedLocationOverlay(activity);
-                mLocationOverlay.setShowAccuracy(true);
-                mMapView.getOverlays().add(mLocationOverlay);
-
-                CustomLocationListener locationListener = new CustomLocationListener(activity, mMapView, mLocationOverlay);
-
-                LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-            }
-            if (mMapOptions.isEnableCompass()) {
-                CompassOverlay mCompassOverlay = new CompassOverlay(activity, new InternalCompassOrientationProvider(activity), mMapView);
-                mCompassOverlay.enableCompass();
-                mMapView.getOverlays().add(mCompassOverlay);
-            }
-            if (mMapOptions.isEnableMultiTouchControls()) {
-                mMapView.setMultiTouchControls(true);
-            }
-            if (mMapOptions.isEnableRotationGesture()) {
-                RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
-                mRotationGestureOverlay.setEnabled(true);
-                mMapView.getOverlays().add(mRotationGestureOverlay);
-            }
-            if (mMapOptions.isEnableScaleOverlay()) {
-                ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(mMapView);
-                mScaleBarOverlay.setCentred(true);
-                //play around with these values to get the location on screen in the right place for your application
-                mScaleBarOverlay.setScaleBarOffset(100, 10);
-                mMapView.getOverlays().add(mScaleBarOverlay);
-            }
-        }
-    }
-
+    private static final String LOG = Utils.class.getSimpleName();
 
     public static int getPixelsFromDIP(Activity activity, int padding_in_dp) {
         final float scale = activity.getResources().getDisplayMetrics().density;
@@ -127,5 +76,54 @@ public class Utils {
 
         int nTiles = cacheManager.possibleTilesInArea(realSize, mMapView.getZoomLevel(), mMapView.getMaxZoomLevel());
         return 0.001 * (Constants.TILE_KB_SIZE * nTiles);
+    }
+
+    /**
+     * @return a list of {@link OverlayItem} if this fragment's arguments contain any
+     */
+    public static List<OverlayItem> getOverlayFromArguments(Bundle args) {
+        String parcoursStringArray = args.getString(KEY_PARCOURS);
+        if (parcoursStringArray != null) {
+            return jsonArrayToOverlayItemList(parcoursStringArray);
+        }
+        return null;
+    }
+
+    public static List<OverlayItem> jsonArrayToOverlayItemList(String parcoursStringArray) {
+        JsonParser parser = new JsonParser();
+        List<OverlayItem> overlayItemsFromArgsList = new ArrayList<>();
+
+        JsonArray parcoursJsonArray = parser
+                .parse(parcoursStringArray)
+                .getAsJsonArray();
+
+
+        for (JsonElement parcoursJson : parcoursJsonArray) {
+            Log.d(LOG, "downloaded parcours: " + parcoursJson.toString());
+
+            Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
+            if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
+
+                GeoPoint point = parcours
+                        .getPrimaryBalise()
+                        .toGeoPoint();
+                OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
+
+                overlayItemsFromArgsList.add(item);
+            } else {
+                Log.d(LOG, "no balises found in that parcours");
+            }
+        }
+        return overlayItemsFromArgsList;
+    }
+
+
+    public static void addDummyBalisesToList(List<OverlayItem> items) {
+        items.add(new OverlayItem("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387)));
+        items.add(new OverlayItem("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613014, 3.138510))); // Berlin
+        items.add(new OverlayItem(
+                "Washington",
+                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
+        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
     }
 }

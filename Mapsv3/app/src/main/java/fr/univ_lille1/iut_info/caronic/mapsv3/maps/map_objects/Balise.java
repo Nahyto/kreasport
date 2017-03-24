@@ -1,5 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
+import org.osmdroid.util.GeoPoint;
+
 /**
  * Created by Chris on 23-Mar-17.
  */
@@ -39,5 +41,9 @@ public class Balise extends BaseItem {
 
     public void setParcours(int parcours) {
         this.parcours = parcours;
+    }
+
+    public GeoPoint toGeoPoint() {
+        return new GeoPoint(latitude, longitude);
     }
 }

@@ -11,10 +11,10 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import org.skife.jdbi.v2.tweak.BeanMapperFactory;
 
 public interface ParcoursDao {
-    @SqlUpdate("create table parcours (id integer primary key autoincrement, name varchar(100), key varchar(100), balise varchar(100))")
+    @SqlUpdate("create table parcours (id integer primary key autoincrement, name varchar(100), key varchar(100), description TEXT)")
     void createParcoursTable();
 
-    @SqlUpdate("insert into parcours (name,key) values (:name, :key)")
+    @SqlUpdate("insert into parcours (name,key,description) values (:name, :key, :description)")
     @GetGeneratedKeys
     int insert(@BindBean() Parcours parcours);
 
@@ -48,8 +48,8 @@ public interface ParcoursDao {
    @RegisterMapperFactory(BeanMapperFactory.class)
    List<Balise> getBalisebyId(@Bind("id") int id);
    
-   @SqlUpdate("update parcours SET name = :name , key = :key  where id = :id")
-   void updateParcours(@Bind("name")String name, @Bind("key") String key, @Bind("id") int id);
+   @SqlUpdate("update parcours SET name = :name , key = :key, description = :description  where id = :id")
+   void updateParcours(@Bind("name")String name, @Bind("key") String key,@Bind("description") String description, @Bind("id") int id);
 
     void close();
 }

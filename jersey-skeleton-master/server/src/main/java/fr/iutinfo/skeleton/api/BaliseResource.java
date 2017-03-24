@@ -41,8 +41,8 @@ public class BaliseResource {
 		}*/
 		BaliseResource p = new BaliseResource();
 		//dao.delete(1);dao.delete(2);
-		dao.insert(new Balise(1,5465464.65465464,4654464.454654654,1));
-		dao.insert(new Balise(1, 56454646.654654654, 6546546546460.4654654456, 1));
+		dao.insert(new Balise(1,5465464.65465464,4654464.454654654,"test",1));
+		dao.insert(new Balise(1, 56454646.654654654, 6546546546460.4654654456,"test", 1));
 		p.remplirB(1);
 		//System.out.println(dao.findById(1));
 		System.out.println(dao.all());
@@ -101,7 +101,7 @@ public class BaliseResource {
     public void updateBalise(@PathParam("id") int id,BaliseDto dto) throws SQLException {
         Balise user = new Balise();
         user.initFromDto(dto);
-        dao.updateBalise(user.getLongitude(), user.getLatitude(), id);
+        dao.updateBalise(user.getLongitude(), user.getLatitude(), user.getDescription(),id);
     }
     @GET
     @Path("/{name}")

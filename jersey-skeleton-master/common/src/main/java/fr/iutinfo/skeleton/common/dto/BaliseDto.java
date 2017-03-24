@@ -11,6 +11,15 @@ public class BaliseDto implements Principal {
     private double latitude;
     private int parcours;
     private int id = 0;
+    private String description;
+    
+    public String getDescription(){
+    	return description;
+    }
+    
+    public void setDescription(String desc){
+    	this.description = desc;
+    }
 
     public double getLongitude() {
         return longitude;

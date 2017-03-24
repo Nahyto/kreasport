@@ -66,7 +66,7 @@ public class ParcoursResource {
     public void updateParcours(@PathParam("id") int id,ParcoursDto dto) throws SQLException {
         Parcours parcours = new Parcours();
         parcours.initFromDto(dto);
-        dao.updateParcours(parcours.getName(), parcours.getkey(), id);
+        dao.updateParcours(parcours.getName(), parcours.getkey(),parcours.getDescription(), id);
     }
 
     @GET
@@ -102,6 +102,7 @@ public class ParcoursResource {
     }
 
     @DELETE
+    @Path("/{id}")
     public void deleteUser(@PathParam("id") int id) {
         dao.delete(id);
     }

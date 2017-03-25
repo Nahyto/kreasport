@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -26,6 +27,7 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.TilesOverlay;
@@ -36,6 +38,7 @@ import java.util.List;
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomItemizedIconOverlay;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomMapView;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.YourReceiver;
@@ -56,6 +59,8 @@ public class OSMFragment extends Fragment {
 
     private static final String LOG = OSMFragment.class.getSimpleName();
 
+    private static final String KEY_ON_ITEM_CLICK = "mapsv3.osm_frag.on_item_click";
+    private static final String KEY_ON_ITEM_CLICK_INDEX = "mapsv3.osm_frag.on_item_click_index";
 
     protected static final String KEY_ANIMATED_TO_SAVED_LOCATION = "mapsv3.osm_frag.animated_to_saved_location";
     protected static final String KEY_DEFAULT_POINT = "mapsv3.osm_frag.initial_point";
@@ -75,11 +80,13 @@ public class OSMFragment extends Fragment {
 
     private CustomMapView mMapView;
     private MapOptions mMapOptions;
-    private BottomSheetBehavior<View> mBottomSheetBehavior2;
+    private BottomSheetBehavior<View> mBottomSheetBehavior;
     private Button mButton2;
     private boolean animatedToSavedLocation;
 
     private YourReceiver receiver;
+    private View bottomSheet;
+    private boolean forceHideBottomSheet;
 
 
     public OSMFragment() {
@@ -150,27 +157,27 @@ public class OSMFragment extends Fragment {
 
     private void setupBottomSheet(View parentView) {
 
-        final View bottomSheet2 = parentView.findViewById(R.id.layout_bottom_sheet);
-        mBottomSheetBehavior2 = BottomSheetBehavior.from(bottomSheet2);
-        mBottomSheetBehavior2.setHideable(true);
-        mBottomSheetBehavior2.setPeekHeight(300);
-        mBottomSheetBehavior2.setState(BottomSheetBehavior.STATE_HIDDEN);
+        bottomSheet = parentView.findViewById(R.id.layout_bottom_sheet);
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mBottomSheetBehavior.setHideable(true);
+        mBottomSheetBehavior.setPeekHeight(300);
+        forceBottomSheetState(true);
 
         mButton2 = (Button) parentView.findViewById(R.id.button_2);
         mButton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mBottomSheetBehavior2.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    mBottomSheetBehavior2.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                } else if (mBottomSheetBehavior2.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                    mBottomSheetBehavior2.setState(BottomSheetBehavior.STATE_HIDDEN);
-                } else if (mBottomSheetBehavior2.getState() == BottomSheetBehavior.STATE_HIDDEN) {
-                    mBottomSheetBehavior2.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
             }
         });
 
-        mBottomSheetBehavior2.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
@@ -179,6 +186,9 @@ public class OSMFragment extends Fragment {
                     mButton2.setText("Hide");
                 } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     mButton2.setText("Show");
+                    if (!forceHideBottomSheet) {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
                 }
             }
 
@@ -186,6 +196,16 @@ public class OSMFragment extends Fragment {
             public void onSlide(View bottomSheet, float slideOffset) {
             }
         });
+    }
+
+    private void forceBottomSheetState(boolean hide) {
+        if (hide) {
+            forceHideBottomSheet = true;
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        } else {
+            forceHideBottomSheet = false;
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
     }
 
     /**
@@ -331,18 +351,18 @@ public class OSMFragment extends Fragment {
     }
 
     public void initParcoursOverlay() {
-        final ArrayList<OverlayItem> firstBalisesInParcoursList = new ArrayList<OverlayItem>();
+        final List<CustomOverlayItem> firstBalisesInParcoursList = new ArrayList<>();
 
         addDummyBalisesToList(firstBalisesInParcoursList);
 
-        List<OverlayItem> parcoursFromJson = getOverlayFromPreferences(getActivity().getPreferences(Context.MODE_PRIVATE));
+        List<CustomOverlayItem> parcoursFromJson = getOverlayFromPreferences(getActivity().getPreferences(Context.MODE_PRIVATE));
         if (parcoursFromJson != null) {
             firstBalisesInParcoursList.addAll(parcoursFromJson);
         }
 
         Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " primary balises");
 
-        ItemizedOverlayWithFocus.OnItemGestureListener listener = CustomItemizedIconOverlay.getListener(getContext());
+        CustomItemClickListener listener = new CustomItemClickListener();
         mParcoursOverlay = new CustomItemizedIconOverlay(getContext(), firstBalisesInParcoursList, listener);
 
         mParcoursOverlay.setFocusItemsOnTap(true);
@@ -353,4 +373,33 @@ public class OSMFragment extends Fragment {
         mParcoursOverlay.setDescriptionBoxPadding(15);
         mMapView.getOverlays().add(mParcoursOverlay);
     }
+
+    private class CustomItemClickListener implements ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+
+        @Override
+        public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
+            onClick(item);
+            return true;
+        }
+
+        @Override
+        public boolean onItemLongPress(final int index, final OverlayItem item) {
+            onClick(item);
+            return false;
+        }
+
+        private void onClick(OverlayItem item) {
+            setBottomSheetInfo(item);
+            forceBottomSheetState(false);
+        }
+    }
+
+    private void setBottomSheetInfo(OverlayItem item) {
+        TextView tvTitle = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_title);
+        TextView tvDesc = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_description);
+
+        tvTitle.setText(item.getTitle());
+        tvDesc.setText(item.getSnippet());
+    }
+
 }

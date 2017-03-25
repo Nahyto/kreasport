@@ -35,6 +35,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
@@ -84,7 +85,7 @@ public class Utils {
     /**
      * @return a list of {@link OverlayItem} if this fragment's arguments contain any
      */
-    public static List<OverlayItem> getOverlayFromPreferences(SharedPreferences preferences) {
+    public static List<CustomOverlayItem> getOverlayFromPreferences(SharedPreferences preferences) {
         String parcoursStringArray = preferences.getString(KEY_PARCOURS, "");
         if (!parcoursStringArray.equals("")) {
             return jsonArrayToOverlayItemList(parcoursStringArray);
@@ -92,9 +93,9 @@ public class Utils {
         return null;
     }
 
-    public static List<OverlayItem> jsonArrayToOverlayItemList(String parcoursStringArray) {
+    public static List<CustomOverlayItem> jsonArrayToOverlayItemList(String parcoursStringArray) {
         JsonParser parser = new JsonParser();
-        List<OverlayItem> overlayItemsFromArgsList = new ArrayList<>();
+        List<CustomOverlayItem> overlayItemsFromArgsList = new ArrayList<>();
 
         JsonArray parcoursJsonArray = parser
                 .parse(parcoursStringArray)
@@ -110,7 +111,7 @@ public class Utils {
                 GeoPoint point = parcours
                         .getPrimaryBalise()
                         .toGeoPoint();
-                OverlayItem item = new OverlayItem(parcours.getTitle(), parcours.getDescription(), point);
+                CustomOverlayItem item = new CustomOverlayItem(parcours.getTitle(), parcours.getDescription(), point, parcours.getPrimaryBalise().getId(), parcours.getId());
 
                 overlayItemsFromArgsList.add(item);
                 Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
@@ -122,12 +123,12 @@ public class Utils {
     }
 
 
-    public static void addDummyBalisesToList(List<OverlayItem> items) {
-        items.add(new OverlayItem("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387)));
-        items.add(new OverlayItem("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613014, 3.138510))); // Berlin
-        items.add(new OverlayItem(
+    public static void addDummyBalisesToList(List<CustomOverlayItem> items) {
+        items.add(new CustomOverlayItem("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), 0, -1));
+        items.add(new CustomOverlayItem("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613014, 3.138510), 0, -1)); // Berlin
+        items.add(new CustomOverlayItem(
                 "Washington",
-                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667))); // Washington
-        items.add(new OverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200))); // San Francisco
+                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667), 0, -1)); // Washington
+        items.add(new CustomOverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200), 0, -1)); // San Francisco
     }
 }

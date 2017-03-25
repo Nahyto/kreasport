@@ -1,8 +1,12 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.widget.Toast;
 
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -32,25 +36,4 @@ public class CustomItemizedIconOverlay<Item extends OverlayItem> extends Itemize
         return result;
     }
 
-    public static ItemizedIconOverlay.OnItemGestureListener getListener(final Context context) {
-        return new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-            @Override
-            public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                Toast.makeText(
-                        context,
-                        "Item '" + item.getTitle() + "' (index=" + index
-                                + ") got single tapped up", Toast.LENGTH_LONG).show();
-                return true;
-            }
-
-            @Override
-            public boolean onItemLongPress(final int index, final OverlayItem item) {
-                Toast.makeText(
-                        context,
-                        "Item '" + item.getTitle() + "' (index=" + index
-                                + ") got long pressed", Toast.LENGTH_LONG).show();
-                return false;
-            }
-        };
-    }
 }

@@ -2,6 +2,8 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
 import org.osmdroid.util.GeoPoint;
 
+import java.util.List;
+
 /**
  * Created by Chris on 23-Mar-17.
  */
@@ -11,6 +13,9 @@ public class Balise extends BaseItem {
     private double latitude;
     private double longitude;
     private int parcours;
+    private boolean isPrimaryBalise;
+    private String question;
+    private List<String> answers;
 
     public Balise(String title, double latitude, double longitude, int parcours) {
         super(title);
@@ -41,6 +46,30 @@ public class Balise extends BaseItem {
 
     public void setParcours(int parcours) {
         this.parcours = parcours;
+    }
+
+    public boolean isPrimaryBalise() {
+        return isPrimaryBalise;
+    }
+
+    public void setPrimaryBalise(boolean primaryBalise) {
+        isPrimaryBalise = primaryBalise;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public List<String> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<String> answers) {
+        this.answers = answers;
     }
 
     public GeoPoint toGeoPoint() {

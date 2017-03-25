@@ -33,6 +33,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/bottom_sheet_title"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="16dp"
@@ -41,6 +42,7 @@
                 android:textSize="16sp"/>
 
             <TextView
+                android:id="@+id/bottom_sheet_description"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="16dp"

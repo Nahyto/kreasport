@@ -48,6 +48,7 @@ import java.util.List;
 
 import static android.R.id.primary;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS_LIST;
 
 /**
  * Created by Christopher Caroni on 17/03/2017.
@@ -84,25 +85,47 @@ public class Utils {
         return 0.001 * (Constants.TILE_KB_SIZE * nTiles);
     }
 
+
     /**
-     * Gets a list of {@link Parcours} from SharedPreferences.
+     * Gets a {@link ParcoursList} from SharedPreferences
+     * <br>Uses {@link fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment#KEY_PARCOURS_LIST}
+     *
      * @param preferences
      * @return
      */
-    public static List<Parcours> getParcoursFromPreferences(SharedPreferences preferences) {
+    public static ParcoursList restoreParcoursListFromOSM(SharedPreferences preferences) {
+        String preSavedParcoursListJson = preferences.getString(KEY_PARCOURS_LIST, "");
+        if (!preSavedParcoursListJson.equals("")) {
+            ParcoursList list = new Gson().fromJson(preSavedParcoursListJson, ParcoursList.class);
+            return list;
+        }
+        return null;
+    }
+
+    /**
+     * Gets a list of {@link Parcours} from SharedPreferences.
+     * <br>Uses {@link fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment#KEY_PARCOURS}
+     *
+     * @param preferences
+     * @param parcoursIdToFocus
+     * @return
+     */
+    public static List<Parcours> getParcoursFromDownload(SharedPreferences preferences, int parcoursIdToFocus) {
         String parcoursStringArray = preferences.getString(KEY_PARCOURS, "");
         if (!parcoursStringArray.equals("")) {
-            return jsonArrayToParcoursList(parcoursStringArray);
+            return jsonArrayToParcoursList(parcoursStringArray, parcoursIdToFocus);
         }
         return null;
     }
 
     /**
      * Converts the json array to a list of {@link Parcours}
+     *
      * @param parcoursStringArray
+     * @param parcoursIdToFocus
      * @return
      */
-    public static List<Parcours> jsonArrayToParcoursList(String parcoursStringArray) {
+    public static List<Parcours> jsonArrayToParcoursList(String parcoursStringArray, int parcoursIdToFocus) {
         JsonParser parser = new JsonParser();
         List<Parcours> parcoursList = new ArrayList<>();
 
@@ -115,9 +138,15 @@ public class Utils {
             Log.d(LOG, "downloaded parcours: " + parcoursJson.toString());
 
             Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
+
             if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
-                Log.d(LOG, "converted parcours: " + parcours.toString());
-                parcoursList.add(parcours);
+                if (parcoursIdToFocus < 0) {
+                    Log.d(LOG, "converted parcours: " + parcours.toString());
+                    parcoursList.add(parcours);
+                } else if (parcoursIdToFocus >= 0 && parcours.getId() == parcoursIdToFocus) {
+                    Log.d(LOG, "converted parcours: " + parcours.toString());
+                    parcoursList.add(parcours);
+                }
             }
         }
         return parcoursList;
@@ -125,6 +154,7 @@ public class Utils {
 
     /**
      * Converts the {@link Parcours} list to a list of {@link CustomOverlayItem}.
+     *
      * @param parcoursList
      * @return
      */
@@ -147,16 +177,16 @@ public class Utils {
 
 
     public static List<Parcours> getDummyParcours() {
-        List<Parcours> parcoursList= new ArrayList<>();
+        List<Parcours> parcoursList = new ArrayList<>();
 
 
         /* PREMIER */
         Parcours parcours = new Parcours("Parcours IUT", "Premier parcours", -10);
 
-        Balise balise = new Balise("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), -10);
+        Balise balise = new Balise("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), -10, 0);
         parcours.addBalise(balise);
 
-        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.6137296, 3.1367387), 1);
+        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.6137296, 3.1367387), -10, 1);
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);
@@ -164,7 +194,7 @@ public class Utils {
         /* SECOND */
         parcours = new Parcours("Washington", "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", -11);
 
-        balise = new Balise("Washington: Balise 1", "Début de l'aventure !", new GeoPoint(38895000, -77036667), -11);
+        balise = new Balise("Washington: Balise 1", "Début de l'aventure !", new GeoPoint(38895000, -77036667), -11, 0);
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);
@@ -172,11 +202,10 @@ public class Utils {
         /* TROISIEME */
         parcours = new Parcours("San Francisco", "SampleDescription", -12);
 
-        balise = new Balise("San Francisco 1", "Début de l'aventure !",new GeoPoint(37779300, -122419200), -12);
+        balise = new Balise("San Francisco 1", "Début de l'aventure !", new GeoPoint(37779300, -122419200), -12, 0);
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);
-
 
 
         return parcoursList;

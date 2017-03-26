@@ -10,16 +10,15 @@ import org.osmdroid.views.overlay.OverlayItem;
 public class CustomOverlayItem extends OverlayItem {
 
     private int parcoursId;
-    private int indexInParcours;
+    private int id;
 
     public CustomOverlayItem(String aTitle, String aSnippet, IGeoPoint aGeoPoint) {
         super(aTitle, aSnippet, aGeoPoint);
     }
 
-    public CustomOverlayItem(String aTitle, String aSnippet, IGeoPoint aGeoPoint, int parcoursId, int indexInParcours) {
+    public CustomOverlayItem(String aTitle, String aSnippet, IGeoPoint aGeoPoint, int parcoursId, int id) {
         super(aTitle, aSnippet, aGeoPoint);
         this.parcoursId = parcoursId;
-        this.indexInParcours = indexInParcours;
     }
 
     public int getParcoursId() {
@@ -30,11 +29,11 @@ public class CustomOverlayItem extends OverlayItem {
         this.parcoursId = parcoursId;
     }
 
-    public int getIndexInParcours() {
-        return indexInParcours;
+    public int getId() {
+        return id;
     }
 
-    public void setIndexInParcours(int indexInParcours) {
-        this.indexInParcours = indexInParcours;
+    public void setId(int id) {
+        this.id = id;
     }
 }

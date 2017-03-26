@@ -11,6 +11,7 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ public class CustomItemizedIconOverlay<Item extends OverlayItem> extends Itemize
     private List listItems;
 
 
-    public CustomItemizedIconOverlay(Context pContext, List aList, OnItemGestureListener aOnItemTapListener) {
+    public CustomItemizedIconOverlay(Context pContext, List<Item> aList, OnItemGestureListener aOnItemTapListener) {
         super(pContext, aList, aOnItemTapListener);
 
         this.context = pContext;

@@ -497,15 +497,15 @@ public class MainActivity extends AppCompatActivity
 
         Parcours parcours = new Parcours("Parcours n° 1", "This one should be just at the IUT's entrance", 0);
         List<Balise> balistList = new ArrayList<>();
-        parcours.addBalise(new Balise("IUT entrance", 50.613588, 3.137106, 1));
-        parcours.addBalise(new Balise("4A20", 50.614174, 3.137404, 1));
+        parcours.addBalise(new Balise("IUT entrance", 50.613588, 3.137106, 1, 0));
+        parcours.addBalise(new Balise("4A20", 50.614174, 3.137404, 1, 1));
         parcours.setBaliseList(balistList);
 
         parcoursList.add(parcours);
 
         parcours = new Parcours("Parcours n° 2", "This one should be just on the parking's stairs", 1);
-        parcours.addBalise(new Balise("parking stairs", 50.613346, 3.138080, 1));
-        parcours.addBalise(new Balise("parking exit/entrance", 50.614294, 3.138434, 1));
+        parcours.addBalise(new Balise("parking stairs", 50.613346, 3.138080, 1, 0));
+        parcours.addBalise(new Balise("parking exit/entrance", 50.614294, 3.138434, 1, 0));
 
         parcoursList.add(parcours);
 
@@ -518,12 +518,4 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    /**
-     * Call from the parcours start fab.
-     * @param view
-     */
-    public void setParcoursAsTarget(View view) {
-        OSMFragment osmFragment = restoreOrCreateOSMFragment();
-        osmFragment.toggleFabClick();
-    }
 }

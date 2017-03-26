@@ -47,4 +47,24 @@ public class ParcoursList {
         }
         return null;
     }
+
+    public void addNew(List<Parcours> parcoursFromDownload) {
+        for (Parcours parcours : parcoursFromDownload) {
+            if (!alreadyHaveParcours(parcours.getId())) {
+                Log.d(LOG, "adding new parcours: " + parcours.getId() + ", " + parcours.getTitle());
+                parcoursList.add(parcours);
+            } else {
+                Log.d(LOG, "already have parcours: " + parcours.getId());
+            }
+        }
+    }
+
+    private boolean alreadyHaveParcours(int parcoursId) {
+        for (Parcours parcours : parcoursList) {
+            if (parcours.getId() == parcoursId) {
+                 return true;
+            }
+        }
+        return false;
+    }
 }

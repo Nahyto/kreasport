@@ -1,8 +1,11 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,13 +14,24 @@ import java.util.List;
 
 public class Parcours extends BaseItem {
 
+    private final static String LOG = Parcours.class.getSimpleName();
+
     private String key;
     @SerializedName("baliseDtoList")
     private List<Balise> baliseList;
+    private int currentBalise = 0;
+    private long elapsedTimeMillis;
 
     public Parcours(String title, String description, int id) {
         super(title, description, id);
-        baliseList = new ArrayList<>();
+        this.elapsedTimeMillis = 0;
+        baliseList = new ArrayList<Balise>() {
+            public boolean add(Balise balise) {
+                super.add(balise);
+                Collections.sort(baliseList); // Balise implements Comparable on id so they'll be sorted by that automatically
+                return true;
+            }
+        };
     }
 
     public String getKey() {
@@ -59,5 +73,25 @@ public class Parcours extends BaseItem {
             }
         }
         return null;
+    }
+
+    /**
+     * <b>!! Use exclusively when getting the balises sequentially. !!</b>
+     *
+     * @return the next balise from last time this was called. Starts at 0.
+     */
+    public Balise getNextBalise() {
+        currentBalise++;
+        return baliseList.get(currentBalise);
+    }
+
+    public void setElapsedTimeMillis(long elapsedTimeMillis) {
+        this.elapsedTimeMillis = elapsedTimeMillis;
+        Log.d(LOG, "updated current time for parcours: " + id + " -> " + elapsedTimeMillis);
+    }
+
+    public long getElapsedTimeMillis() {
+        Log.d(LOG, "getting time for parcours: " + id + " -> " + elapsedTimeMillis);
+        return elapsedTimeMillis;
     }
 }

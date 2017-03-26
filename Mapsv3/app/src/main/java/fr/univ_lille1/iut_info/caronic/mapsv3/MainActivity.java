@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity
     private final static String KEY_CURRENT_TAG = "mapsv3.key_current_tag";
 
     private Fragment storeFeedFragment;
-    private Fragment storeExploreFragment;
+    private OSMFragment storeExploreFragment;
     private Fragment storePermissionsFragment;
 
     /**
@@ -245,8 +245,8 @@ public class MainActivity extends AppCompatActivity
         return fragment;
     }
 
-    private Fragment restoreOrCreateOSMFragment() {
-        Fragment fragment;
+    private OSMFragment restoreOrCreateOSMFragment() {
+        OSMFragment fragment;
         fragment = storeExploreFragment;
         if (fragment == null) {
             Log.d(LOG, "creating new osm fragment");
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Adds the json string to OSMFragment's arguments so they'll be loading in onCreateView automatically
+     * Adds the whole downloaded json string to this activities preferences so they'll stay on close.
      * @param jsonParcours
      */
     @SuppressLint("ApplySharedPref")
@@ -495,23 +495,17 @@ public class MainActivity extends AppCompatActivity
         ArrayList<Parcours> parcoursList = new ArrayList<>();
 
 
-        Parcours parcours = new Parcours("Parcours n° 1");
-        parcours.setId(1);
-        parcours.setDescription("This one should be just at the IUT's entrance");
+        Parcours parcours = new Parcours("Parcours n° 1", "This one should be just at the IUT's entrance", 0);
         List<Balise> balistList = new ArrayList<>();
-        balistList.add(new Balise("IUT entrance", 50.613588, 3.137106, 1));
-        balistList.add(new Balise("4A20", 50.614174, 3.137404, 1));
+        parcours.addBalise(new Balise("IUT entrance", 50.613588, 3.137106, 1));
+        parcours.addBalise(new Balise("4A20", 50.614174, 3.137404, 1));
         parcours.setBaliseList(balistList);
 
         parcoursList.add(parcours);
 
-        parcours = new Parcours("Parcours n° 2");
-        parcours.setId(2);
-        parcours.setDescription("This one should be just on the parking's stairs");
-        balistList = new ArrayList<>();
-        balistList.add(new Balise("parking stairs", 50.613346, 3.138080, 1));
-        balistList.add(new Balise("parking exit/entrance", 50.614294, 3.138434, 1));
-        parcours.setBaliseList(balistList);
+        parcours = new Parcours("Parcours n° 2", "This one should be just on the parking's stairs", 1);
+        parcours.addBalise(new Balise("parking stairs", 50.613346, 3.138080, 1));
+        parcours.addBalise(new Balise("parking exit/entrance", 50.614294, 3.138434, 1));
 
         parcoursList.add(parcours);
 
@@ -522,5 +516,14 @@ public class MainActivity extends AppCompatActivity
 
         return parcoursListJson;
 
+    }
+
+    /**
+     * Call from the parcours start fab.
+     * @param view
+     */
+    public void setParcoursAsTarget(View view) {
+        OSMFragment osmFragment = restoreOrCreateOSMFragment();
+        osmFragment.toggleFabClick();
     }
 }

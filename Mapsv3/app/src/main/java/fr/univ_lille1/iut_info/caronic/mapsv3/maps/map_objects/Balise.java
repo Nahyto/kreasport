@@ -1,5 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
+import android.location.Location;
+
 import org.osmdroid.util.GeoPoint;
 
 import java.util.List;
@@ -12,16 +14,31 @@ public class Balise extends BaseItem {
 
     private double latitude;
     private double longitude;
-    private int parcours;
+    private int parcoursId;
     private boolean isPrimaryBalise;
     private String question;
     private List<String> answers;
 
-    public Balise(String title, double latitude, double longitude, int parcours) {
-        super(title);
+    public Balise(String title, String description, double latitude, double longitude, int parcoursId) {
+        super(title, description);
         this.latitude = latitude;
         this.longitude = longitude;
-        this.parcours = parcours;
+        this.parcoursId = parcoursId;
+    }
+
+    public Balise(String title, String description, GeoPoint point, int parcoursId) {
+        super(title, description);
+        this.description = description;
+        this.latitude = point.getLatitude();
+        this.longitude = point.getLongitude();
+        this.parcoursId = parcoursId;
+    }
+
+    public Balise(String title, double latitude, double longitude, int parcoursId) {
+        super(title, "No description");
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.parcoursId = parcoursId;
     }
 
     public double getLongitude() {
@@ -40,12 +57,12 @@ public class Balise extends BaseItem {
         this.latitude = latitude;
     }
 
-    public int getParcours() {
-        return parcours;
+    public int getParcoursId() {
+        return parcoursId;
     }
 
-    public void setParcours(int parcours) {
-        this.parcours = parcours;
+    public void setParcoursId(int parcoursId) {
+        this.parcoursId = parcoursId;
     }
 
     public boolean isPrimaryBalise() {
@@ -74,5 +91,12 @@ public class Balise extends BaseItem {
 
     public GeoPoint toGeoPoint() {
         return new GeoPoint(latitude, longitude);
+    }
+
+    public Location toLocation() {
+        Location result = new Location("");
+        result.setLatitude(getLatitude());
+        result.setLongitude(getLongitude());
+        return result;
     }
 }

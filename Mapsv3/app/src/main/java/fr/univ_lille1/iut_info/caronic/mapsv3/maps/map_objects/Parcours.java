@@ -2,6 +2,7 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,22 +11,13 @@ import java.util.List;
 
 public class Parcours extends BaseItem {
 
-    private String description;
     private String key;
     @SerializedName("baliseDtoList")
     private List<Balise> baliseList;
 
-    public Parcours(String title) {
-        super(title);
-    }
-
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public Parcours(String title, String description, int id) {
+        super(title, description, id);
+        baliseList = new ArrayList<>();
     }
 
     public String getKey() {
@@ -48,4 +40,24 @@ public class Parcours extends BaseItem {
         return baliseList.get(0);
     }
 
+    public void addBalise(Balise balise) {
+        baliseList.add(balise);
+    }
+
+    @Override
+    public String toString() {
+        return "Parcours{" +
+                "key='" + key + '\'' +
+                super.toString() + '\'' +
+                '}';
+    }
+
+    public Balise getBaliseById(int baliseId) {
+        for (Balise balise : baliseList) {
+            if (balise.getId() == baliseId) {
+                return balise;
+            }
+        }
+        return null;
+    }
 }

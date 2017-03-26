@@ -35,8 +35,10 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.ParcoursList;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 import org.osmdroid.views.overlay.OverlayItem;
@@ -83,19 +85,26 @@ public class Utils {
     }
 
     /**
-     * @return a list of {@link OverlayItem} if this fragment's arguments contain any
+     * Gets a list of {@link Parcours} from SharedPreferences.
+     * @param preferences
+     * @return
      */
-    public static List<CustomOverlayItem> getOverlayFromPreferences(SharedPreferences preferences) {
+    public static List<Parcours> getParcoursFromPreferences(SharedPreferences preferences) {
         String parcoursStringArray = preferences.getString(KEY_PARCOURS, "");
         if (!parcoursStringArray.equals("")) {
-            return jsonArrayToOverlayItemList(parcoursStringArray);
+            return jsonArrayToParcoursList(parcoursStringArray);
         }
         return null;
     }
 
-    public static List<CustomOverlayItem> jsonArrayToOverlayItemList(String parcoursStringArray) {
+    /**
+     * Converts the json array to a list of {@link Parcours}
+     * @param parcoursStringArray
+     * @return
+     */
+    public static List<Parcours> jsonArrayToParcoursList(String parcoursStringArray) {
         JsonParser parser = new JsonParser();
-        List<CustomOverlayItem> overlayItemsFromArgsList = new ArrayList<>();
+        List<Parcours> parcoursList = new ArrayList<>();
 
         JsonArray parcoursJsonArray = parser
                 .parse(parcoursStringArray)
@@ -107,28 +116,69 @@ public class Utils {
 
             Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
             if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
-
-                GeoPoint point = parcours
-                        .getPrimaryBalise()
-                        .toGeoPoint();
-                CustomOverlayItem item = new CustomOverlayItem(parcours.getTitle(), parcours.getDescription(), point, parcours.getPrimaryBalise().getId(), parcours.getId());
-
-                overlayItemsFromArgsList.add(item);
-                Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
-            } else {
-                Log.d(LOG, "no balises found in that parcours");
+                Log.d(LOG, "converted parcours: " + parcours.toString());
+                parcoursList.add(parcours);
             }
         }
-        return overlayItemsFromArgsList;
+        return parcoursList;
+    }
+
+    /**
+     * Converts the {@link Parcours} list to a list of {@link CustomOverlayItem}.
+     * @param parcoursList
+     * @return
+     */
+    public static List<CustomOverlayItem> mainParcoursBalisesToOverlayList(ParcoursList parcoursList) {
+        Log.d(LOG, "converting parcours to overlay items");
+
+        List<CustomOverlayItem> overlayItemsList = new ArrayList<>();
+
+        for (Parcours parcours : parcoursList.getParcoursList()) {
+            GeoPoint point = parcours
+                    .getPrimaryBalise()
+                    .toGeoPoint();
+            CustomOverlayItem item = new CustomOverlayItem(parcours.getTitle(), parcours.getDescription(), point, parcours.getId(), parcours.getPrimaryBalise().getId());
+
+            overlayItemsList.add(item);
+            Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
+        }
+        return overlayItemsList;
     }
 
 
-    public static void addDummyBalisesToList(List<CustomOverlayItem> items) {
-        items.add(new CustomOverlayItem("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), 0, -1));
-        items.add(new CustomOverlayItem("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613014, 3.138510), 0, -1)); // Berlin
-        items.add(new CustomOverlayItem(
-                "Washington",
-                "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", new GeoPoint(38895000, -77036667), 0, -1)); // Washington
-        items.add(new CustomOverlayItem("San Francisco", "SampleDescription", new GeoPoint(37779300, -122419200), 0, -1)); // San Francisco
+    public static List<Parcours> getDummyParcours() {
+        List<Parcours> parcoursList= new ArrayList<>();
+
+
+        /* PREMIER */
+        Parcours parcours = new Parcours("Parcours IUT", "Premier parcours", -10);
+
+        Balise balise = new Balise("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), -10);
+        parcours.addBalise(balise);
+
+        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.6137296, 3.1367387), 1);
+        parcours.addBalise(balise);
+
+        parcoursList.add(parcours);
+
+        /* SECOND */
+        parcours = new Parcours("Washington", "This SampleDescription is a pretty long one. Almost as long as a the great wall in china.", -11);
+
+        balise = new Balise("Washington: Balise 1", "Début de l'aventure !", new GeoPoint(38895000, -77036667), -11);
+        parcours.addBalise(balise);
+
+        parcoursList.add(parcours);
+
+        /* TROISIEME */
+        parcours = new Parcours("San Francisco", "SampleDescription", -12);
+
+        balise = new Balise("San Francisco 1", "Début de l'aventure !",new GeoPoint(37779300, -122419200), -12);
+        parcours.addBalise(balise);
+
+        parcoursList.add(parcours);
+
+
+
+        return parcoursList;
     }
 }

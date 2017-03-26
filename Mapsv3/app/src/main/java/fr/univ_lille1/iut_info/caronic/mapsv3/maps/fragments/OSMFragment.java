@@ -2,6 +2,7 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -10,45 +11,57 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.BuildConfig;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.CopyrightOverlay;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
-import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomItemizedIconOverlay;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomMapView;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.ParcoursList;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.YourReceiver;
 
+import static android.R.string.cancel;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.ACTION_PROXIMITY_ALERT;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.LOCATION_IUT;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_DISTANCECHANGE_FOR_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_TIME_BETWEEN_UPDATE;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.addDummyBalisesToList;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getOverlayFromPreferences;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getDummyParcours;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getParcoursFromPreferences;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.mainParcoursBalisesToOverlayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -72,21 +85,28 @@ public class OSMFragment extends Fragment {
 
     private static GeoPoint defaultPoint;
     private static GeoPoint savedPoint;
-
-
-    private ItemizedOverlayWithFocus<OverlayItem> mParcoursOverlay;
     protected int zoom;
-    private ArrayList<Parcours> listeParcours;
+
+
+    private ParcoursList parcoursList;
+    private CustomItemizedIconOverlay mParcoursOverlay;
+
 
     private CustomMapView mMapView;
     private MapOptions mMapOptions;
     private BottomSheetBehavior<View> mBottomSheetBehavior;
-    private Button mButton2;
     private boolean animatedToSavedLocation;
 
+    private LocationManager locationManager;
+
     private YourReceiver receiver;
+
     private View bottomSheet;
-    private boolean forceHideBottomSheet;
+    private FloatingActionButton fab;
+
+    private CustomOverlayItem focusedOverlayItem;
+    private boolean confirmStartParcours;
+    private boolean parcoursStarted;
 
 
     public OSMFragment() {
@@ -128,7 +148,7 @@ public class OSMFragment extends Fragment {
     }
 
     /**
-     * Creates map and adds it to relativelayout in fragmentView
+     * Creates map and adds it to osm_frag_top_relative_layout in fragmentView
      *
      * @param fragmentView
      */
@@ -145,7 +165,7 @@ public class OSMFragment extends Fragment {
         GeoPoint point = new GeoPoint(defaultPoint);
         mMapView.getController().setCenter(point);
 
-        initParcoursOverlay();
+        restoreParcoursList();
         basicMapSetup();
         restoreSavedPosition();
 
@@ -155,57 +175,18 @@ public class OSMFragment extends Fragment {
         relativeLayout.addView(mMapView);
     }
 
+    /**
+     * Sets up the bottom sheet and all views associated (fab...)
+     *
+     * @param parentView
+     */
     private void setupBottomSheet(View parentView) {
+        bottomSheet = parentView.findViewById(R.id.bottom_sheet);
 
-        bottomSheet = parentView.findViewById(R.id.layout_bottom_sheet);
+        fab = (FloatingActionButton) parentView.findViewById(R.id.fab);
+
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setHideable(true);
-        mBottomSheetBehavior.setPeekHeight(300);
-        forceBottomSheetState(true);
-
-        mButton2 = (Button) parentView.findViewById(R.id.button_2);
-        mButton2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                }
-            }
-        });
-
-        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    mButton2.setText("Peek");
-                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    mButton2.setText("Hide");
-                } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    mButton2.setText("Show");
-                    if (!forceHideBottomSheet) {
-                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                    }
-                }
-            }
-
-            @Override
-            public void onSlide(View bottomSheet, float slideOffset) {
-            }
-        });
-    }
-
-    private void forceBottomSheetState(boolean hide) {
-        if (hide) {
-            forceHideBottomSheet = true;
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        } else {
-            forceHideBottomSheet = false;
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        forceBottomSheetState(false);
     }
 
     /**
@@ -290,7 +271,7 @@ public class OSMFragment extends Fragment {
     // we can ignore because we only launch this fragment after checking permissions.
     private void setLocationListener() {
 
-        LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -350,20 +331,54 @@ public class OSMFragment extends Fragment {
         super.onStop();
     }
 
-    public void initParcoursOverlay() {
+    /**
+     * Call this every time we setup the map (so even at rotations). The data does not need to be saved directly as it is already present in SharedPrefrences.
+     * Initializes the parcours list from SharedPreferences. If not empty, initializes the overlay for the parcours and the background overlay.
+     */
+    public void restoreParcoursList() {
+
+        parcoursList = new ParcoursList();
+        parcoursList.addAll(getParcoursFromPreferences(getActivity().getPreferences(Context.MODE_PRIVATE)));
+        parcoursList.addAll(getDummyParcours());
+
+        if (parcoursList != null) {
+            initParcoursOverlay();
+            initBackgroundOverlay();
+        } else {
+            Log.d(LOG, "No parcours in sharedprefs");
+        }
+    }
+
+    /**
+     * Creates an overlay from the parcoursList and adds it to the MapView.
+     */
+    private void initParcoursOverlay() {
         final List<CustomOverlayItem> firstBalisesInParcoursList = new ArrayList<>();
 
-        addDummyBalisesToList(firstBalisesInParcoursList);
-
-        List<CustomOverlayItem> parcoursFromJson = getOverlayFromPreferences(getActivity().getPreferences(Context.MODE_PRIVATE));
-        if (parcoursFromJson != null) {
-            firstBalisesInParcoursList.addAll(parcoursFromJson);
-        }
+        firstBalisesInParcoursList.addAll(mainParcoursBalisesToOverlayList(parcoursList));
 
         Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " primary balises");
 
-        CustomItemClickListener listener = new CustomItemClickListener();
-        mParcoursOverlay = new CustomItemizedIconOverlay(getContext(), firstBalisesInParcoursList, listener);
+        mParcoursOverlay = new CustomItemizedIconOverlay(getContext(), firstBalisesInParcoursList, new ItemizedIconOverlay.OnItemGestureListener<CustomOverlayItem>() {
+
+            @Override
+            public boolean onItemSingleTapUp(final int index, final CustomOverlayItem item) {
+                onClick(item);
+                return true;
+            }
+
+            @Override
+            public boolean onItemLongPress(final int index, final CustomOverlayItem item) {
+                onClick(item);
+                return false;
+            }
+
+            private void onClick(CustomOverlayItem item) {
+                Log.d(LOG, "clicked on parcours: " + item.getParcoursId());
+                setBottomSheetInfoToParcours(item);
+                forceBottomSheetState(false);
+            }
+        });
 
         mParcoursOverlay.setFocusItemsOnTap(true);
 
@@ -374,32 +389,173 @@ public class OSMFragment extends Fragment {
         mMapView.getOverlays().add(mParcoursOverlay);
     }
 
-    private class CustomItemClickListener implements ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+    /**
+     * Creates an overlay in the background that will register all clicks to dismiss the overlay descriptions.
+     */
+    private void initBackgroundOverlay() {
+        MapEventsOverlay mMapEventOverlay = new MapEventsOverlay(new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                dismissParcoursInfo();
+                return true;
+            }
 
-        @Override
-        public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-            onClick(item);
-            return true;
-        }
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        });
 
-        @Override
-        public boolean onItemLongPress(final int index, final OverlayItem item) {
-            onClick(item);
-            return false;
-        }
+        mMapView.getOverlays().add(0, mMapEventOverlay);
+    }
 
-        private void onClick(OverlayItem item) {
-            setBottomSheetInfo(item);
-            forceBottomSheetState(false);
+
+    /**
+     * Call to dismiss the focused overlayitem and bottomsheet with fab.
+     */
+    private void dismissParcoursInfo() {
+        mParcoursOverlay.unSetFocusedItem();
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheet.setVisibility(View.INVISIBLE);
+        fab.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * Called when the bottom sheet if alrady populated with info from clicking a primary balise.
+     * Called on fab start click.
+     * Sets the parcours as the target for the user.
+     */
+    public void setParcoursAsTarget() {
+        if (focusedOverlayItem != null) {
+            int parcoursId = focusedOverlayItem.getParcoursId();
+
+            Balise primaryBalise = parcoursList.getParcoursById(parcoursId).getPrimaryBalise();
+
+            if (verifyStartPossibility(primaryBalise)) {
+                // Use the Builder class for convenient dialog construction
+                new ParcoursConfirmation().show(true);
+            }
         }
     }
 
-    private void setBottomSheetInfo(OverlayItem item) {
+    /**
+     * @param primaryBalise the primary balise of the parcours the user is trying to start
+     * @return whether the user is near the primary balise
+     */
+    @SuppressWarnings({"ResourceType"})
+    private boolean verifyStartPossibility(Balise primaryBalise) {
+        Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        Log.d(LOG, "calculating distance to  balise: " + primaryBalise.getId() + " from parcours: " + primaryBalise.getParcoursId());
+        Log.d(LOG, "calculating distance to " + primaryBalise.toLocation().toString());
+        Log.d(LOG, "calculating with current location: " + lastLocation.toString());
+
+
+        Location destLocation = new Location("");
+        destLocation.setLatitude(primaryBalise.getLatitude());
+        destLocation.setLongitude(primaryBalise.getLongitude());
+
+        final float distanceTo = lastLocation.distanceTo(destLocation);
+
+        final int distanceRounded = Math.round(distanceTo);
+        Toast.makeText(getContext(), "Distance: " + distanceRounded + "m", Toast.LENGTH_SHORT).show();
+
+        if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
+            Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+            return false;
+        }
+
+        Log.d(LOG, "Inside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+
+        return true;
+    }
+
+    /**
+     * Call when an OverlayItem is clicked. Sets the bottom sheet's info to that item's and sets it to be visible.
+     *
+     * @param item
+     */
+    private void setBottomSheetInfoToParcours(CustomOverlayItem item) {
         TextView tvTitle = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_title);
         TextView tvDesc = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_description);
 
         tvTitle.setText(item.getTitle());
         tvDesc.setText(item.getSnippet());
+
+        focusedOverlayItem = item;
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheet.setVisibility(View.VISIBLE);
+        fab.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * "Hides" or reveals the bottom sheet + fab by setting visibility.
+     *
+     * @param hide
+     */
+    private void forceBottomSheetState(boolean hide) {
+        if (hide) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            bottomSheet.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            bottomSheet.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void toggleFabClick() {
+        if (parcoursStarted) {
+            new ParcoursConfirmation().show(false);
+        } else {
+            setParcoursAsTarget();
+        }
+    }
+
+    private class ParcoursConfirmation {
+
+        private void show(boolean start) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            if (start) {
+                builder.setMessage("Do you really want to start the parcours now?")
+                        .setPositiveButton("Yes please", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                toggleActiveParcoursState(true);
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+            } else {
+                builder.setMessage("Do you really want to stop the parcours?")
+                        .setPositiveButton("Yes, cancel it", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                toggleActiveParcoursState(false);
+                            }
+                        })
+                        .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+            }
+            builder.show();
+        }
+    }
+
+    private void toggleActiveParcoursState(boolean start) {
+        if (start && fab.getVisibility() == VISIBLE) {
+            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_stop_white_24dp));
+            Toast.makeText(getContext(), "Starting parcours!", Toast.LENGTH_SHORT).show();
+            parcoursStarted = true;
+        } else if (!start && fab.getVisibility() == VISIBLE) {
+            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_play_arrow_white_24dp));
+            Toast.makeText(getContext(), "Stopped parcours!", Toast.LENGTH_SHORT).show();
+            parcoursStarted = false;
+        }
+
+    }
 }

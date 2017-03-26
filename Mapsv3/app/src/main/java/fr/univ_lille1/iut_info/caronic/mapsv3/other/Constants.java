@@ -20,4 +20,9 @@ public class Constants {
 
     public static final long MINIMUM_TIME_BETWEEN_UPDATE = 5000;
     public static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 3;
+
+    /**
+     * The radius of the circle the user has to be in to activate a parcours in meters.
+     */
+    public static final double MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS = 5;
 }

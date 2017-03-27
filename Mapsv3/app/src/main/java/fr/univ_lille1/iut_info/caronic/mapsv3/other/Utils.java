@@ -1,17 +1,8 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.*;
-import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.preference.Preference;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -22,16 +13,6 @@ import org.osmdroid.tileprovider.cachemanager.CacheManager;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
-import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.ScaleBarOverlay;
-import org.osmdroid.views.overlay.compass.CompassOverlay;
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-import org.osmdroid.views.overlay.mylocation.DirectedLocationOverlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 
@@ -39,14 +20,9 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.ParcoursList;
-import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
-
-import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.List;
 
-import static android.R.id.primary;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment.KEY_PARCOURS_LIST;
 
@@ -173,14 +149,16 @@ public class Utils {
             Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
 
             if (parcoursStarted) {
-                Log.d(LOG ,"will now add up to targeted balise: " + parcours.getBaliseToTarget());
-                for (int i = 1; i <= parcours.getBaliseToTarget(); i++) {
-                    Balise balise = parcours.getBaliseList().get(i);
-                    point = balise.toGeoPoint();
-                    item = new CustomOverlayItem(balise.getTitle(), balise.getDescription(), point, parcours.getId(), balise.getId());
+                Log.d(LOG, "will now add up to targeted balise: " + parcours.getBaliseToTargetIndex());
+                for (int i = 1; i <= parcours.getBaliseToTargetIndex(); i++) {
+                    if (i < parcours.getBaliseList().size()) {
+                        Balise balise = parcours.getBaliseList().get(i);
+                        point = balise.toGeoPoint();
+                        item = new CustomOverlayItem(balise.getTitle(), balise.getDescription(), point, parcours.getId(), balise.getId());
 
-                    overlayItemsList.add(item);
-                    Log.d(LOG, "for parcours " + parcours.getId() + " added target balise: " + balise.getId() + ", " + balise.getTitle());
+                        overlayItemsList.add(item);
+                        Log.d(LOG, "for parcours " + parcours.getId() + " added target balise: " + balise.getId() + ", " + balise.getTitle());
+                    }
                 }
             }
         }
@@ -198,7 +176,10 @@ public class Utils {
         Balise balise = new Balise("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), -10, 0);
         parcours.addBalise(balise);
 
-        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613465, 3.137428), -10, 1);
+        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.612464, 3.139467), -10, 1);
+        parcours.addBalise(balise);
+
+        balise = new Balise("IUT A : Balise 3", "La fin!", new GeoPoint(50.612709, 3.141881), -10, 2);
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);

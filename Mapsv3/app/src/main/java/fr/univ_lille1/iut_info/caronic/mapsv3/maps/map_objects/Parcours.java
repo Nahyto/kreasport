@@ -97,8 +97,12 @@ public class Parcours extends BaseItem {
      *
      * @return
      */
-    public int getBaliseToTarget() {
+    public int getBaliseToTargetIndex() {
         return baliseToTarget;
+    }
+
+    public Balise getBaliseToTarget() {
+        return baliseList.get(baliseToTarget);
     }
 
     public void setBaliseToTarget(int baliseToTarget) {

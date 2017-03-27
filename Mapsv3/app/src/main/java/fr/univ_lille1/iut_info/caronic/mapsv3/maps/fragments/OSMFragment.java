@@ -386,15 +386,21 @@ public class OSMFragment extends Fragment {
      */
     public void intializeParcoursAndOverlay(boolean includeDummy, int focusOnParcours, boolean parcoursStarted) {
 
-        parcoursList = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
-
-        if (parcoursList == null) {
+        if (parcoursStarted) {
+            ParcoursList allRestored = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
             parcoursList = new ParcoursList();
-        }
+            parcoursList.addSpecificParcours(allRestored, focusOnParcours);
+        } else {
+            parcoursList = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
 
-        parcoursList.addNew(getParcoursFromDownload(getActivity().getPreferences(Context.MODE_PRIVATE), focusOnParcours));
-        if (includeDummy) {
-            parcoursList.addNew(getDummyParcours());
+            if (parcoursList == null) {
+                parcoursList = new ParcoursList();
+            }
+
+            parcoursList.addNew(getParcoursFromDownload(getActivity().getPreferences(Context.MODE_PRIVATE), focusOnParcours));
+            if (includeDummy) {
+                parcoursList.addNew(getDummyParcours(focusOnParcours));
+            }
         }
 
         if (parcoursList != null) {
@@ -575,7 +581,8 @@ public class OSMFragment extends Fragment {
 
         final int distanceRounded = Math.round(distanceTo);
 
-        if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
+        // if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
+        if (distanceRounded > 150) {
             Toast.makeText(getContext(), "You are " + distanceRounded + "m too far from the parcours!", Toast.LENGTH_SHORT).show();
             Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
             return false;
@@ -623,7 +630,7 @@ public class OSMFragment extends Fragment {
 
             currentParcoursId = focusedOverlayItem.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(false, currentParcoursId, parcoursStarted);
+            focusOnParcours(true, currentParcoursId, parcoursStarted);
 
             Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
 
@@ -667,6 +674,8 @@ public class OSMFragment extends Fragment {
     }
 
     private void focusOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {
+        Log.d(LOG, "focusing on parcours: " + parcoursId);
+
         mMapView.getOverlays().remove(mParcoursOverlay);
         mMapView.invalidate();
         intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
@@ -701,6 +710,6 @@ public class OSMFragment extends Fragment {
         Parcours parcours = parcoursList.getParcoursById(parcoursId);
         parcours.incrementTargetBalise();
         saveParcoursListToPrefs();
-        focusOnParcours(false, parcoursId, parcoursStarted);
+        focusOnParcours(true, parcoursId, parcoursStarted);
     }
 }

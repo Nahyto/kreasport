@@ -140,10 +140,10 @@ public class Utils {
             Parcours parcours = new Gson().fromJson(parcoursJson, Parcours.class);
 
             if (parcours != null && parcours.getBaliseList() != null && parcours.getBaliseList().size() > 0) {
-                if (parcoursIdToFocus < 0) {
+                if (parcoursIdToFocus > -10 && parcoursIdToFocus < 0) {
                     Log.d(LOG, "converted parcours: " + parcours.toString());
                     parcoursList.add(parcours);
-                } else if (parcoursIdToFocus >= 0 && parcours.getId() == parcoursIdToFocus) {
+                } else if ((parcoursIdToFocus >= 0 || parcoursIdToFocus <= -10) && parcours.getId() == parcoursIdToFocus) {
                     Log.d(LOG, "converted parcours: " + parcours.toString());
                     parcoursList.add(parcours);
                 }
@@ -173,7 +173,8 @@ public class Utils {
             Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
 
             if (parcoursStarted) {
-                for (int i = 1; i < parcours.getBaliseToTarget(); i++) {
+                Log.d(LOG ,"will now add up to targeted balise: " + parcours.getBaliseToTarget());
+                for (int i = 1; i <= parcours.getBaliseToTarget(); i++) {
                     Balise balise = parcours.getBaliseList().get(i);
                     point = balise.toGeoPoint();
                     item = new CustomOverlayItem(balise.getTitle(), balise.getDescription(), point, parcours.getId(), balise.getId());
@@ -187,7 +188,7 @@ public class Utils {
     }
 
 
-    public static List<Parcours> getDummyParcours() {
+    public static List<Parcours> getDummyParcours(int focusOnParcours) {
         List<Parcours> parcoursList = new ArrayList<>();
 
 
@@ -217,6 +218,16 @@ public class Utils {
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);
+
+        if (focusOnParcours <= -10 || focusOnParcours >= 0) {
+            for (Parcours parcoursIdCheck : parcoursList) {
+                if (parcoursIdCheck.getId() == focusOnParcours) {
+                    List<Parcours> oneList = new ArrayList<>(1);
+                    oneList.add(parcoursIdCheck);
+                    return oneList;
+                }
+            }
+        }
 
 
         return parcoursList;

@@ -69,4 +69,13 @@ public class ParcoursList {
         }
         return false;
     }
+
+    public void addSpecificParcours(ParcoursList allRestored, int focusOnParcours) {
+        for (Parcours parcours : allRestored.getParcoursList()) {
+            if (parcours.getId() == focusOnParcours) {
+                parcoursList.add(parcours);
+                return;
+            }
+        }
+    }
 }

@@ -71,11 +71,17 @@ public class ParcoursList {
     }
 
     public void addSpecificParcours(ParcoursList allRestored, int focusOnParcours) {
-        for (Parcours parcours : allRestored.getParcoursList()) {
-            if (parcours.getId() == focusOnParcours) {
-                parcoursList.add(parcours);
-                return;
+        Log.d(LOG, "adding specific parcours");
+        if (allRestored != null) {
+
+            for (Parcours parcours : allRestored.getParcoursList()) {
+                if (parcours.getId() == focusOnParcours) {
+                    parcoursList.add(parcours);
+                    return;
+                }
             }
+        } else {
+            Log.d(LOG, "couldnt add because parameter was null");
         }
     }
 }

@@ -19,6 +19,7 @@ public class CustomOverlayItem extends OverlayItem {
     public CustomOverlayItem(String aTitle, String aSnippet, IGeoPoint aGeoPoint, int parcoursId, int id) {
         super(aTitle, aSnippet, aGeoPoint);
         this.parcoursId = parcoursId;
+        this.id = id;
     }
 
     public int getParcoursId() {

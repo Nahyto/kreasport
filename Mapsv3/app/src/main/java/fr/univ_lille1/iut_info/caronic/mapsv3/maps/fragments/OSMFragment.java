@@ -82,7 +82,6 @@ public class OSMFragment extends Fragment {
     protected static final String KEY_SAVED_LOCATION = "mapsv3.osm_frag.saved_location";
     protected static final String KEY_ZOOM = "mapsv3.osm_frag.zoom";
     protected static final String KEY_MAP_OPTIONS = "mapsv3.osm_frag.map_options";
-    protected static final String KEY_CURRENT_PARCOURS = "mapsv3.osm_frag.current_parcours";
 
     /**
      * Used for getting the initial downloaded parcours transferred from {@link fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity}
@@ -92,6 +91,8 @@ public class OSMFragment extends Fragment {
      * Used for saving/getting {@link ParcoursList} from inside this class. Useful for saving time elsapsed
      */
     public static final String KEY_PARCOURS_LIST = "mapsv3.osm_frag.parcours_list";
+    private static final String KEY_PARCOURS_STARTED = "mapsv3.osm_frag.parcours_started";
+    private static final String KEY_CURRENT_BALISE = "mapsv3.osm_frag.current_balise";
 
     private static GeoPoint defaultPoint;
     private static GeoPoint savedPoint;
@@ -120,10 +121,9 @@ public class OSMFragment extends Fragment {
     private TextView progression;
 
 
-    private CustomOverlayItem focusedOverlayItem;
     private boolean parcoursStarted;
-    private int currentParcoursId;
     private Location currentLocation;
+    private Balise currentBalise;
 
 
     public OSMFragment() {
@@ -157,9 +157,9 @@ public class OSMFragment extends Fragment {
 
         View fragmentView = inflater.inflate(R.layout.osm_fragment, container, false);
 
-        setupBottomSheet(fragmentView);
-
         setupMapView(fragmentView);
+
+        setupBottomSheet(fragmentView);
 
         return fragmentView;
     }
@@ -182,7 +182,11 @@ public class OSMFragment extends Fragment {
         GeoPoint point = new GeoPoint(defaultPoint);
         mMapView.getController().setCenter(point);
 
-        intializeParcoursAndOverlay(true, -1, parcoursStarted);
+        if (currentBalise != null) {
+            intializeParcoursAndOverlay(true, currentBalise.getParcoursId(), parcoursStarted);
+        } else {
+            intializeParcoursAndOverlay(true, -1, parcoursStarted);
+        }
         basicMapSetup();
         restoreSavedPosition();
 
@@ -224,12 +228,32 @@ public class OSMFragment extends Fragment {
         progression = (TextView) parentView.findViewById(R.id.bottom_sheet_active_progression);
 
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        forceHideBottomSheet(true);
+
+        if (currentBalise == null) {
+            forceHideBottomSheet(true);
+        } else {
+
+            //toggleBottomSheetParcoursState(parcoursStarted);
+            Log.d(LOG, "on restore bottom sheet, current balise: " + currentBalise.getId() + " and parcours started: " + parcoursStarted);
+
+            setBottomSheetInfoToParcours(currentBalise);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            if (parcoursStarted) {
+                bottomSheetActive.setVisibility(VISIBLE);
+                bottomSheetMain.setVisibility(GONE);
+                fab.setVisibility(GONE);
+            } else {
+                bottomSheetActive.setVisibility(GONE);
+                bottomSheetMain.setVisibility(VISIBLE);
+                fab.setVisibility(VISIBLE);
+            }
+        }
     }
 
     /**
      * Basic map settings such as hw acceleration, copyright overlay...
      */
+
     private void basicMapSetup() {
         Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         mMapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -256,9 +280,15 @@ public class OSMFragment extends Fragment {
             savedPoint = new Gson().fromJson(initalPointJson, GeoPoint.class);
         }
 
-        int restoredParcoursId = getArguments().getInt(KEY_CURRENT_PARCOURS, -1);
-        if (restoredParcoursId != -1) {
-            currentParcoursId = restoredParcoursId;
+        parcoursStarted = getActivity()
+                .getPreferences(Context.MODE_PRIVATE)
+                .getBoolean(KEY_PARCOURS_STARTED, false);
+
+        String currentBaliseJson = getActivity()
+                .getPreferences(Context.MODE_PRIVATE)
+                .getString(KEY_CURRENT_BALISE, "");
+        if (!currentBaliseJson.equals("")) {
+            currentBalise = new Gson().fromJson(currentBaliseJson, Balise.class);
         }
 
 
@@ -284,7 +314,7 @@ public class OSMFragment extends Fragment {
                     .getPreferences(Context.MODE_PRIVATE)
                     .edit()
                     .putString(KEY_SAVED_LOCATION, currentPointJson)
-                    .apply();
+                    .commit();
             Log.d(LOG, "saving current position: " + currentPointJson);
         }
     }
@@ -361,22 +391,54 @@ public class OSMFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(final Bundle outState) {
+        Log.d(LOG, "onsaveinstance");
+
         saveCurrentPosition();
         saveParcoursListToPrefs();
-        outState.putInt(KEY_CURRENT_PARCOURS, currentParcoursId);
+        saveCurrentBalise();
         super.onSaveInstanceState(outState);
+    }
+
+    private void saveCurrentBalise() {
+        if (currentBalise != null) {
+            Log.d(LOG, "saving current balise to prefs: " + currentBalise.getId());
+
+            String currenbaliseJson = new Gson().toJson(currentBalise, Balise.class);
+
+            getActivity()
+                    .getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_CURRENT_BALISE, currenbaliseJson)
+                    .putBoolean(KEY_PARCOURS_STARTED, parcoursStarted)
+                    .commit();
+        } else {
+            Log.d(LOG, "couldnt save current balise, was null");
+            getActivity()
+                    .getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_CURRENT_BALISE, "")
+                    .putBoolean(KEY_PARCOURS_STARTED, false)
+                    .commit();
+        }
     }
 
     @Override
     public void onPause() {
-        getActivity().unregisterReceiver(receiver);
+        try {
+            getActivity().unregisterReceiver(receiver);
+        } catch (IllegalArgumentException e) {
+
+        }
         super.onPause();
     }
 
     @Override
     public void onStop() {
+        Log.d(LOG, "onStop");
+
         saveCurrentPosition();
         saveParcoursListToPrefs();
+        saveCurrentBalise();
         super.onStop();
     }
 
@@ -386,11 +448,13 @@ public class OSMFragment extends Fragment {
      */
     public void intializeParcoursAndOverlay(boolean includeDummy, int focusOnParcours, boolean parcoursStarted) {
 
-        if (parcoursStarted) {
+        if (parcoursStarted && (focusOnParcours <= -10 || focusOnParcours >= 0)) {
+            Log.d(LOG, "focusing on parcours:" + focusOnParcours);
             ParcoursList allRestored = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
             parcoursList = new ParcoursList();
             parcoursList.addSpecificParcours(allRestored, focusOnParcours);
         } else {
+            Log.d(LOG, "showing all parcours:");
             parcoursList = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
 
             if (parcoursList == null) {
@@ -412,12 +476,14 @@ public class OSMFragment extends Fragment {
     }
 
     private void saveParcoursListToPrefs() {
+        Log.d(LOG, "saving parcours list to prefs");
+
         String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
         getActivity()
                 .getPreferences(Context.MODE_PRIVATE)
                 .edit()
                 .putString(KEY_PARCOURS_LIST, parcoursListJson)
-                .apply();
+                .commit();
     }
 
     /**
@@ -428,7 +494,7 @@ public class OSMFragment extends Fragment {
 
         firstBalisesInParcoursList.addAll(getOverlayFromParours(parcoursList, parcoursStarted));
 
-        Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " primary balises");
+        Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " balises in the overlay");
 
         mParcoursOverlay = new CustomItemizedIconOverlay<>(getContext(), firstBalisesInParcoursList, new ItemizedIconOverlay.OnItemGestureListener<CustomOverlayItem>() {
 
@@ -445,8 +511,10 @@ public class OSMFragment extends Fragment {
             }
 
             private void onClick(CustomOverlayItem item) {
-                Log.d(LOG, "clicked on parcours: " + item.getParcoursId());
-                setBottomSheetInfoToParcours(item);
+                Log.d(LOG, "clicked on overlayitem: " + item.getId() + " from parcours:" + item.getParcoursId());
+                currentBalise = parcoursList.getParcoursById(item.getParcoursId()).getBaliseById(item.getId());
+                Log.d(LOG, "clicked on balise: " + currentBalise.getId() + "from parcours: " + item.getParcoursId());
+                setBottomSheetInfoToParcours(currentBalise);
                 forceHideBottomSheet(false);
             }
         });
@@ -492,26 +560,32 @@ public class OSMFragment extends Fragment {
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheet.setVisibility(View.INVISIBLE);
-        fab.setVisibility(View.INVISIBLE);
+        fab.setVisibility(View.GONE);
     }
 
     /**
      * Call when an OverlayItem is clicked. Sets the bottom sheet's info to that item's and sets it to be visible.
      *
-     * @param item
+     * @param balise
      */
-    private void setBottomSheetInfoToParcours(CustomOverlayItem item) {
+    private void setBottomSheetInfoToParcours(Balise balise) {
         TextView tvTitle = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_title);
         TextView tvDesc = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_description);
 
-        tvTitle.setText(item.getTitle());
-        tvDesc.setText(item.getSnippet());
-
-        focusedOverlayItem = item;
+        tvTitle.setText(balise.getTitle());
+        tvDesc.setText(balise.getDescription());
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheet.setVisibility(View.VISIBLE);
-        fab.setVisibility(View.VISIBLE);
+        if (parcoursStarted) {
+            bottomSheetMain.setVisibility(GONE);
+            bottomSheetActive.setVisibility(VISIBLE);
+            fab.setVisibility(View.GONE);
+        } else {
+            fab.setVisibility(View.VISIBLE);
+            bottomSheetMain.setVisibility(VISIBLE);
+            bottomSheetActive.setVisibility(GONE);
+        }
     }
 
     /**
@@ -523,7 +597,7 @@ public class OSMFragment extends Fragment {
         if (hide) {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.INVISIBLE);
-            fab.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.GONE);
         } else {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.VISIBLE);
@@ -545,8 +619,10 @@ public class OSMFragment extends Fragment {
      * Sets the parcours as the target for the user.
      */
     public void setParcoursAsTarget() {
-        if (focusedOverlayItem != null) {
-            int parcoursId = focusedOverlayItem.getParcoursId();
+        Log.d(LOG, "setting parcours as target");
+
+        if (currentBalise != null) {
+            int parcoursId = currentBalise.getParcoursId();
 
             Balise primaryBalise = parcoursList.getParcoursById(parcoursId).getPrimaryBalise();
 
@@ -625,17 +701,21 @@ public class OSMFragment extends Fragment {
     }
 
     private void toggleBottomSheetParcoursState(boolean start) {
+        Log.d(LOG, "toggling bottomsheet state");
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         if (start) {
             parcoursStarted = true;
 
-            currentParcoursId = focusedOverlayItem.getParcoursId();
+            int currentParcoursId = currentBalise.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
             focusOnParcours(true, currentParcoursId, parcoursStarted);
 
             Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
 
             // offset the start by how much time has already passed last time the parcours was started
-            chronometer.setBase(SystemClock.elapsedRealtime() - currentParcours.getElapsedTimeMillis());
+            long base = SystemClock.elapsedRealtime() - currentParcours.getElapsedTimeMillis();
+            chronometer.setBase(base);
 
             // TODO receiver for next balise location alert
 
@@ -666,7 +746,7 @@ public class OSMFragment extends Fragment {
     }
 
     private void saveTimeForParcours() {
-        Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
+        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
 
         long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
 
@@ -680,7 +760,7 @@ public class OSMFragment extends Fragment {
         mMapView.invalidate();
         intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
 
-        Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
+        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
         // initial target is primary balise at index 0 which is already shown
         // therefore we need to show the next one once we start
         if (parcoursStarted && currentParcours.getBaliseToTarget() == 0) {
@@ -690,23 +770,10 @@ public class OSMFragment extends Fragment {
 
     // TODO show next balise, add location alert, broadcast receiver...
 
-    /*
-    private void revealNextBalise(int parcoursId) {
-        Parcours parcours = parcoursList.getParcoursById(parcoursId);
-        Balise nextBalise = parcours.getNextBalise();
-        if (nextBalise != null) {
-
-            mParcoursOverlay.addItem(nextBalise.toCustomOverlayItem());
-            mMapView.invalidate();
-            Log.d(LOG, "addded balise: " + nextBalise.getId() + " from parcours: "
-                    + nextBalise.getParcoursId() + ", " + nextBalise.getTitle());
-        } else {
-            Log.d(LOG, "no next balise, reached last one already");
-        }
-    }
-    */
 
     private void revealNextBalise(int parcoursId) {
+        Log.d(LOG, "increment target balise for parcours: " + parcoursId);
+        Log.d(LOG, "will reload the overlay");
         Parcours parcours = parcoursList.getParcoursById(parcoursId);
         parcours.incrementTargetBalise();
         saveParcoursListToPrefs();

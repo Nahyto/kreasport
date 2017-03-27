@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity
     public void downloadJson(View view) {
 
 //        String url = "http://172.18.49.102:8080/v1/parcours";
-        String url = "http://10.0.2.2:8080/v1/parcours";
+        String url = "http://51.255.131.189/v1/parcours";
 
 
         Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);

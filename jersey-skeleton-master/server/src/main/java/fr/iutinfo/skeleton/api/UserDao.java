@@ -35,5 +35,9 @@ public interface UserDao {
     @SqlQuery("select * from users where id = :id")
     @RegisterMapperFactory(BeanMapperFactory.class)
     User findById(@Bind("id") int id);
-
+    
+    @SqlUpdate("update users SET alias = :alias where id = :id")
+    void updateUser(@Bind("alias")String alias, @Bind("id") int id);
+    
+    void close();
 }

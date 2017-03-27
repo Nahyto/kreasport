@@ -104,13 +104,13 @@ public class BaliseResource {
         dao.updateBalise(user.getLongitude(), user.getLatitude(), user.getDescription(),id);
     }
     @GET
-    @Path("/{name}")
-    public BaliseDto getBalise(@PathParam("name") String name) {
-        Balise user = dao.findByName(name);
-        if (user == null) {
+    @Path("/{id}")
+    public BaliseDto getBalise(@PathParam("id") int id) {
+        Balise balise = dao.findById(id);
+        if (balise == null) {
             throw new WebApplicationException(404);
         }
-        return user.convertToDto();
+        return balise.convertToDto();
     }
 
     @GET

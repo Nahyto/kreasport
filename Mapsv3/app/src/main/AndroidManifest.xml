@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fr.univ_lille1.iut_info.caronic.mapsv3">
+          package="fr.univ_lille1.iut_info.caronic.mapsv3">
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <receiver android:name="fr.univ_lille1.iut_info.caronic.mapsv3.other.YourReceiver" >
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <receiver android:name=".other.YourReceiver" android:exported="false">
         <intent-filter>
-            <action android:name="ACTION_PROXIMITY_ALERT" />
+            <action android:name="ACTION_PROXIMITY_ALERT"/>
         </intent-filter>
     </receiver>
+
     <application
-        android:hardwareAccelerated="true"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".maps.activities.OfflineAreas"
             android:label="@string/offline_areas_action_bar_title"
@@ -39,9 +39,8 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity" />
+                android:value="fr.univ_lille1.iut_info.caronic.mapsv3.MainActivity"/>
         </activity>
-
         <activity
             android:name=".maps.activities.OfflineAreaSelection"
             android:label="@string/offline_area_selection_action_bar_title"
@@ -49,9 +48,8 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".maps.activities.OfflineAreas" />
+                android:value=".maps.activities.OfflineAreas"/>
         </activity>
-
     </application>
 
 </manifest>

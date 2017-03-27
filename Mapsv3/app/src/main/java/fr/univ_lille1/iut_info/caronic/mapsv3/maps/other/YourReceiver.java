@@ -18,9 +18,9 @@ public class YourReceiver extends BroadcastReceiver {
         final Boolean entering = intent.getBooleanExtra(key, false);
 
         if (entering) {
-            Toast.makeText(context, "entering", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "entering area for balise", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(context, "exiting", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "exiting area for balise", Toast.LENGTH_SHORT).show();
         }
     }
 }

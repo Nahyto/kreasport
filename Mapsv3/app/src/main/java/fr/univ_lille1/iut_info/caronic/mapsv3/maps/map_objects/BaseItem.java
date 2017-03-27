@@ -11,9 +11,17 @@ public class BaseItem {
     @SerializedName("name")
     protected String title;
     protected int id;
+    protected String description;
 
-    public BaseItem(String title) {
+    public BaseItem(String title, String description) {
         this.title = title;
+        this.description = description;
+    }
+
+    public BaseItem(String title, String description, int id) {
+        this.title = title;
+        this.description = description;
+        this.id = id;
     }
 
     public String getTitle() {
@@ -30,5 +38,22 @@ public class BaseItem {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseItem{" +
+                "title='" + title + '\'' +
+                ", id=" + id +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

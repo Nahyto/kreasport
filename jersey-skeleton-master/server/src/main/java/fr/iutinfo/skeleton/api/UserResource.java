@@ -1,5 +1,6 @@
 package fr.iutinfo.skeleton.api;
 
+import fr.iutinfo.skeleton.common.dto.ParcoursDto;
 import fr.iutinfo.skeleton.common.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +43,9 @@ public class UserResource {
     }
 
     @GET
-    @Path("/{name}")
-    public UserDto getUser(@PathParam("name") String name) {
-        User user = dao.findByName(name);
+    @Path("/{id}")
+    public UserDto getUser(@PathParam("id") int id) {
+        User user = dao.findById(id);
         if (user == null) {
             throw new WebApplicationException(404);
         }
@@ -67,6 +68,14 @@ public class UserResource {
     @Path("/{id}")
     public void deleteUser(@PathParam("id") int id) {
         dao.delete(id);
+    }
+    
+    @PUT
+    @Path("/{id}")
+    public void updateParcours(@PathParam("id") int id,UserDto dto) throws SQLException {
+        User user = new User();
+        user.initFromDto(dto);
+        dao.updateUser(user.getAlias(),id);
     }
 
 }

@@ -36,6 +36,9 @@ public class Parcours implements Principal {
 	}
 
 	public Parcours() {
+
+		UUID uuid = UUID.randomUUID();
+		key = uuid.toString();
 	}
 
 	public String getDescription(){

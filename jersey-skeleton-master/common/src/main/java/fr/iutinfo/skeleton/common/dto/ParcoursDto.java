@@ -2,6 +2,7 @@ package fr.iutinfo.skeleton.common.dto;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class ParcoursDto implements Principal {
     final static Logger logger = LoggerFactory.getLogger(ParcoursDto.class);
     private String name;
-    private String key;
+    private String key = "";
     private String balise;
 	private List<BaliseDto> baliseDtoList;
 	private String description;

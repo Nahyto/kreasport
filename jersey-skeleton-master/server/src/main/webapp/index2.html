@@ -31,34 +31,43 @@
 							<fieldset>
 								<label name="login">Login</label> <input type="email" id="pseudo"/> 
 								<label
-									name="password">Password</label> <input type="password" id="mdp"/> <input
+									name="passwordJS">Password</label> <input type="password" id="mdp"/> <input
 									 type="submit" value="Login" id="boutonAuthen" />
 								<script>
   
 								$('#boutonAuthen').click(function (event) {
-  									$.ajax({
-								    // The URL for the request
-								    url: "/v1/user",
-								    // The data to send (will be converted to a query string)
-								    //data:"{}",
-								    // Whether this is a POST/GET/UPDATE/DELETE request
-								    type: "GET",
-								    // The type of data we expect back
-								    dataType : "json",
-								    // Code to run if the request succeeds;
-								    // the response is passed to the function
-								    success: function( json ) {
-								    	var j = JSON.parse(JSON.stringify(json));
-								    	var nom = document.getElementById("pseudo").value;
-								    	console.log(nom+"");
-								    	if(nom===j[0].name && 'admin' === j[0].alias){
-								    		console.log(j[0].name+"memepseudo");
-								    	}
-								    	console.log(""+j[0].id);
-								    	console.log("JSON Recup");
-								    }
+
+  										$.ajax({
+								    	// The URL for the request
+								    	url: "/v1/secure/who",
+								    	// The data to send (will be converted to a query string)
+								    	//data:"{}",
+								    	// Whether this is a POST/GET/UPDATE/DELETE request
+								    	type: "GET",
+								    	// The type of data we expect back
+								    	dataType : "json",
+									    // Code to run if the request succeeds;
+									    // the response is passed to the function
+									    beforeSend : function(req) {
+        									req.setRequestHeader("Authorization", "Basic " + btoa($("#pseudo").val() + ":" + $("#mdp").val()));
+       									},
+									    success: function( data ) {
+									    	
+									    	if(data.id != -1 && data.alias == 'admin'){
+									    		 document.location.href="creation/kreasport.html"; 
+									    	}else{
+									    		console.log('tu peux pas mdr');
+									    	}
+									    	
+									    	
+									    },
+									   error: function(xhr, textStatus, errorThrown){
+	       									alert(''+errorThrown);
+	    								}
+									  
+										});
+	    								
 									});
-								});
 								
   </script>
 

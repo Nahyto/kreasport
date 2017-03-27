@@ -23,6 +23,7 @@ public class Constants {
 
     /**
      * The radius of the circle the user has to be in to activate a parcours in meters.
+     * Default = 5
      */
-    public static final double MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS = 5;
+    public static final double MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS = 90;
 }

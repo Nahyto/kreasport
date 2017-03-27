@@ -51,18 +51,16 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.ParcoursList;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
-import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.YourReceiver;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.ACTION_PROXIMITY_ALERT;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.LOCATION_IUT;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_DISTANCECHANGE_FOR_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_TIME_BETWEEN_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getDummyParcours;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getParcoursFromDownload;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getOverlayFromParours;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getParcoursFromDownload;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.restoreParcoursListFromOSM;
 
 /**
@@ -109,8 +107,6 @@ public class OSMFragment extends Fragment {
     private boolean animatedToSavedLocation;
 
     private LocationManager locationManager;
-
-    private YourReceiver receiver;
 
     private View bottomSheet;
     private FloatingActionButton fab;
@@ -160,6 +156,7 @@ public class OSMFragment extends Fragment {
         setupMapView(fragmentView);
 
         setupBottomSheet(fragmentView);
+        toggleBottomSheetParcoursState(parcoursStarted);
 
         return fragmentView;
     }
@@ -271,6 +268,8 @@ public class OSMFragment extends Fragment {
      * Restores intialPoint, mMapOptions and zoom from arguments
      */
     private void restoreArguments() {
+        Log.d(LOG, "restore arguments");
+
         defaultPoint = (GeoPoint) getArguments().getSerializable(KEY_DEFAULT_POINT);
 
         String initalPointJson = getActivity()
@@ -289,12 +288,17 @@ public class OSMFragment extends Fragment {
                 .getString(KEY_CURRENT_BALISE, "");
         if (!currentBaliseJson.equals("")) {
             currentBalise = new Gson().fromJson(currentBaliseJson, Balise.class);
+            Log.d(LOG, "restored current balise");
+        } else {
+            Log.d(LOG, "couldnt restore current balise");
         }
 
 
         mMapOptions = (MapOptions) getArguments().getSerializable(KEY_MAP_OPTIONS);
         zoom = getArguments().getInt(KEY_ZOOM);
         animatedToSavedLocation = getArguments().getBoolean(KEY_ANIMATED_TO_SAVED_LOCATION);
+
+        Log.d(LOG, "done restore args\n");
     }
 
     /**
@@ -346,6 +350,9 @@ public class OSMFragment extends Fragment {
             public void onLocationChanged(Location location) {
                 Log.d(LOG, "location updated: " + location.toString());
                 currentLocation = location;
+                if (parcoursStarted) {
+                    verifyNearTargetBalise();
+                }
             }
 
             @Override
@@ -377,26 +384,6 @@ public class OSMFragment extends Fragment {
                 locationListener
         );
 
-
-        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        locationManager.addProximityAlert(LOCATION_IUT.getLatitude(), LOCATION_IUT.getLatitude(), 1000, -1, pendingIntent);
-
-        receiver = new YourReceiver();
-        IntentFilter intentFilter = new IntentFilter(ACTION_PROXIMITY_ALERT);
-
-        getActivity().registerReceiver(receiver, intentFilter);
-
-    }
-
-    @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        Log.d(LOG, "onsaveinstance");
-
-        saveCurrentPosition();
-        saveParcoursListToPrefs();
-        saveCurrentBalise();
-        super.onSaveInstanceState(outState);
     }
 
     private void saveCurrentBalise() {
@@ -423,12 +410,21 @@ public class OSMFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        try {
-            getActivity().unregisterReceiver(receiver);
-        } catch (IllegalArgumentException e) {
+    public void onSaveInstanceState(final Bundle outState) {
+        Log.d(LOG, "onsaveinstance");
 
-        }
+        saveTimeForParcours();
+        saveCurrentPosition();
+        saveParcoursListToPrefs();
+        saveCurrentBalise();
+
+        Log.d(LOG, "DONE onsaveinstace");
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onPause() {
+        // unregister receiver
         super.onPause();
     }
 
@@ -436,9 +432,12 @@ public class OSMFragment extends Fragment {
     public void onStop() {
         Log.d(LOG, "onStop");
 
+        saveTimeForParcours();
         saveCurrentPosition();
         saveParcoursListToPrefs();
         saveCurrentBalise();
+
+        Log.d(LOG, "DONE onstop");
         super.onStop();
     }
 
@@ -569,6 +568,8 @@ public class OSMFragment extends Fragment {
      * @param balise
      */
     private void setBottomSheetInfoToParcours(Balise balise) {
+        Log.d(LOG, "set bottom sheet info to parcours");
+
         TextView tvTitle = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_title);
         TextView tvDesc = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_description);
 
@@ -580,11 +581,33 @@ public class OSMFragment extends Fragment {
         if (parcoursStarted) {
             bottomSheetMain.setVisibility(GONE);
             bottomSheetActive.setVisibility(VISIBLE);
-            fab.setVisibility(View.GONE);
         } else {
-            fab.setVisibility(View.VISIBLE);
             bottomSheetMain.setVisibility(VISIBLE);
             bottomSheetActive.setVisibility(GONE);
+        }
+
+        bottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bottomSheet.getVisibility() == VISIBLE) {
+                    if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    } else {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
+                }
+            }
+        });
+
+        if (currentBalise != null) {
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours != null && !parcoursStarted && parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+        } else {
+            fab.setVisibility(GONE);
         }
     }
 
@@ -597,11 +620,20 @@ public class OSMFragment extends Fragment {
         if (hide) {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.INVISIBLE);
-            fab.setVisibility(View.GONE);
         } else {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.VISIBLE);
-            fab.setVisibility(View.VISIBLE);
+        }
+
+        if (currentBalise != null) {
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours != null && !parcoursStarted && parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+        } else {
+            fab.setVisibility(GONE);
         }
     }
 
@@ -657,9 +689,8 @@ public class OSMFragment extends Fragment {
 
         final int distanceRounded = Math.round(distanceTo);
 
-        // if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
-        if (distanceRounded > 150) {
-            Toast.makeText(getContext(), "You are " + distanceRounded + "m too far from the parcours!", Toast.LENGTH_SHORT).show();
+        if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
+            Toast.makeText(getContext(), "You are " + distanceRounded + "m away from the parcours!", Toast.LENGTH_SHORT).show();
             Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
             return false;
         }
@@ -709,7 +740,7 @@ public class OSMFragment extends Fragment {
 
             int currentParcoursId = currentBalise.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(true, currentParcoursId, parcoursStarted);
+            focusOnParcours(true, currentParcoursId, true);
 
             Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
 
@@ -738,7 +769,13 @@ public class OSMFragment extends Fragment {
             mParcoursOverlay.unSetFocusedItem();
             focusOnParcours(true, -1, parcoursStarted);
 
-            fab.setVisibility(VISIBLE);
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+
             bottomSheetMain.setVisibility(View.VISIBLE);
             bottomSheetActive.setVisibility(GONE);
             Toast.makeText(getContext(), "Stopped parcours!", Toast.LENGTH_SHORT).show();
@@ -746,15 +783,21 @@ public class OSMFragment extends Fragment {
     }
 
     private void saveTimeForParcours() {
-        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        if (currentBalise != null) {
+            Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
 
-        long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
+            long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
 
-        currentParcours.setElapsedTimeMillis(elapsedMillis);
+            currentParcours.setElapsedTimeMillis(elapsedMillis);
+            Log.d(LOG, "saving time for parcours: " + currentParcours.getId() + " -> " + elapsedMillis);
+        } else {
+            Log.d(LOG, "couldnt save time for currentParcours bc currentBalise null");
+        }
     }
 
     private void focusOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {
         Log.d(LOG, "focusing on parcours: " + parcoursId);
+        saveParcoursListToPrefs();
 
         mMapView.getOverlays().remove(mParcoursOverlay);
         mMapView.invalidate();
@@ -772,6 +815,7 @@ public class OSMFragment extends Fragment {
     // TODO show next balise, add location alert, broadcast receiver...
 
 
+    @SuppressWarnings({"ResourceType"})
     private void revealNextBalise(int parcoursId) {
         Log.d(LOG, "increment target balise for parcours: " + parcoursId);
         Log.d(LOG, "will reload the overlay");
@@ -779,5 +823,53 @@ public class OSMFragment extends Fragment {
         parcours.incrementTargetBalise();
         saveParcoursListToPrefs();
         focusOnParcours(true, parcoursId, parcoursStarted);
+    }
+
+    private void verifyNearTargetBalise() {
+        if (currentBalise != null) {
+            Log.d(LOG, "veryfying near target balise");
+            Balise baliseToTarget = parcoursList.getParcoursById(currentBalise.getParcoursId()).getBaliseToTarget();
+
+            Location destLocation = new Location("");
+            destLocation.setLatitude(baliseToTarget.getLatitude());
+            destLocation.setLongitude(baliseToTarget.getLongitude());
+
+            float distance = destLocation.distanceTo(currentLocation);
+            int distanceRounded = Math.round(distance);
+
+            if (distance > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
+                Log.d(LOG, "too far by " + (distanceRounded - MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) + "m");
+                Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+            } else {
+                Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
+                Log.d(LOG, "reached next balise: " + baliseToTarget.getId() + " for parcours: " + baliseToTarget.getParcoursId());
+                doActionReachedBalise();
+                revealNextBalise(currentBalise.getParcoursId());
+            }
+        }
+
+    }
+
+    private void doActionReachedBalise() {
+        Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        if (parcours.isBaliseLastOne(currentBalise.getId())) {
+            validateEndParcours();
+        } else {
+            revealNextBalise(currentBalise.getParcoursId());
+        }
+    }
+
+    private void validateEndParcours() {
+        parcoursStarted = false;
+
+        chronometer.stop();
+        saveTimeForParcours();
+        saveParcoursListToPrefs();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Congratulations! You have reached the last balise!")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
     }
 }

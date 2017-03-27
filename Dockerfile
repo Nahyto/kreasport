@@ -7,10 +7,8 @@ run apt-get update \
 #run mvn install
 run rm -rf /var/lib/jetty9/webapps/root
 add . /srv/jersey-skeleton/
-workdir /srv/jersey-skeleton/
-run cd jersey-skeleton-master
+workdir /srv/jersey-skeleton/jersey-skeleton-master
 run mvn install
-run cp /srv/jersey-skeleton/war/target/war-1.0-SNAPSHOT.war /var/lib/jetty9/webapps/root.war
 expose 8080
-workdir /srv/jersey-skeleton/server
+workdir /srv/jersey-skeleton/jersey-skeleton-master/server
 cmd mvn jetty:run

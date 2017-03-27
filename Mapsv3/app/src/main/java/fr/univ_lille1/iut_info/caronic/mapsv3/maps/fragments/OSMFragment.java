@@ -716,8 +716,8 @@ public class OSMFragment extends Fragment {
                             }
                         });
             } else {
-                builder.setMessage("Do you really want to stop the parcours?")
-                        .setPositiveButton("Yes, cancel it", new DialogInterface.OnClickListener() {
+                builder.setMessage("Do you really want to pause the parcours?")
+                        .setPositiveButton("Yes, pause it", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 toggleBottomSheetParcoursState(false);
                             }
@@ -844,7 +844,6 @@ public class OSMFragment extends Fragment {
                 Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
                 Log.d(LOG, "reached next balise: " + baliseToTarget.getId() + " for parcours: " + baliseToTarget.getParcoursId());
                 doActionReachedBalise();
-                revealNextBalise(currentBalise.getParcoursId());
             }
         }
 
@@ -856,6 +855,16 @@ public class OSMFragment extends Fragment {
             validateEndParcours();
         } else {
             revealNextBalise(currentBalise.getParcoursId());
+            incrementBottomSheetProgression();
+        }
+    }
+
+    private void incrementBottomSheetProgression() {
+        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        int max = currentParcours.getNumberOfBalises();
+        int currentIndex = currentParcours.getBaliseIndex(currentBalise.getId());
+        if (max > 0 && currentIndex >= 0) {
+            progression.setText("" + (currentIndex+1) + "/" + max);
         }
     }
 

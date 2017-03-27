@@ -126,6 +126,7 @@ public class OSMFragment extends Fragment {
     private CustomOverlayItem focusedOverlayItem;
     private boolean parcoursStarted;
     private int currentParcoursId;
+    private Location currentLocation;
 
 
     public OSMFragment() {
@@ -317,6 +318,7 @@ public class OSMFragment extends Fragment {
             @Override
             public void onLocationChanged(Location location) {
                 Log.d(LOG, "location updated: " + location.toString());
+                currentLocation = location;
             }
 
             @Override
@@ -556,23 +558,26 @@ public class OSMFragment extends Fragment {
      */
     @SuppressWarnings({"ResourceType"})
     private boolean verifyStartPossibility(Balise primaryBalise) {
-        Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (currentLocation == null) {
+            Toast.makeText(getContext(), "Couldn't verify your present location", Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
         Log.d(LOG, "calculating distance to  balise: " + primaryBalise.getId() + " from parcours: " + primaryBalise.getParcoursId());
         Log.d(LOG, "calculating distance to " + primaryBalise.toLocation().toString());
-        Log.d(LOG, "calculating with current location: " + lastLocation.toString());
+        Log.d(LOG, "calculating with current location: " + currentLocation.toString());
 
 
         Location destLocation = new Location("");
         destLocation.setLatitude(primaryBalise.getLatitude());
         destLocation.setLongitude(primaryBalise.getLongitude());
 
-        final float distanceTo = lastLocation.distanceTo(destLocation);
+        final float distanceTo = currentLocation.distanceTo(destLocation);
 
         final int distanceRounded = Math.round(distanceTo);
 
         if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
-            Toast.makeText(getContext(), "You are too far from the parcours!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "You are " + distanceRounded + "m too far from the parcours!", Toast.LENGTH_SHORT).show();
             Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
             return false;
         }
@@ -666,6 +671,11 @@ public class OSMFragment extends Fragment {
         mMapView.getOverlays().remove(mParcoursOverlay);
         mMapView.invalidate();
         intializeParcoursAndOverlay(includeDummy, parcoursId);
+
+        Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
+        if (currentParcours.getBaliseToTarget() == 1) {
+            revealNextBalise(parcoursId);
+        }
     }
 
     // TODO show next balise, add location alert, broadcast receiver...
@@ -675,6 +685,8 @@ public class OSMFragment extends Fragment {
         Balise nextBalise = parcours.getNextBalise();
 
         mParcoursOverlay.addItem(nextBalise.toCustomOverlayItem());
+        Log.d(LOG, "addded balise: " + nextBalise.getId() + " from parcours: "
+                + nextBalise.getParcoursId() + ", " + nextBalise.getTitle());
 
     }
 }

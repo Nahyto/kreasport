@@ -19,7 +19,12 @@ public class Parcours extends BaseItem {
     private String key;
     @SerializedName("baliseDtoList")
     private List<Balise> baliseList;
-    private int currentBalise = 0;
+    /**
+     * This is the index of the next balise to get.
+     * Starts at 1 because 0 is the primary balise which marks the start
+     * Use to save progression.
+     */
+    private int baliseToTarget = 1;
     private long elapsedTimeMillis;
 
     public Parcours(String title, String description, int id) {
@@ -81,8 +86,21 @@ public class Parcours extends BaseItem {
      * @return the next balise from last time this was called. Starts at 0.
      */
     public Balise getNextBalise() {
-        currentBalise++;
-        return baliseList.get(currentBalise);
+        baliseToTarget++;
+        return baliseList.get(baliseToTarget);
+    }
+
+    /**
+     * The index of the balise to target. Starts at 1 because the first (0) is the primary balise which marks the start
+     *
+     * @return
+     */
+    public int getBaliseToTarget() {
+        return baliseToTarget;
+    }
+
+    public void setBaliseToTarget(int baliseToTarget) {
+        this.baliseToTarget = baliseToTarget;
     }
 
     public void setElapsedTimeMillis(long elapsedTimeMillis) {

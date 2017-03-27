@@ -43,15 +43,16 @@ public class UserResource {
     }
 
     @GET
-    @Path("/{id}")
-    public UserDto getUser(@PathParam("id") int id) {
-        User user = dao.findById(id);
+    @Path("/{name}")
+    public UserDto getUser(@PathParam("name") String name) {
+        User user = dao.findByName(name);
         if (user == null) {
             throw new WebApplicationException(404);
         }
         return user.convertToDto();
     }
 
+    
     @GET
     public List<UserDto> getAllUsers(@QueryParam("q") String query) {
         List<User> users;

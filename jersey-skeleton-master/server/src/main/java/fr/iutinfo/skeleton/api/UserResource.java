@@ -51,6 +51,7 @@ public class UserResource {
         }
         return user.convertToDto();
     }
+    
 
     
     @GET

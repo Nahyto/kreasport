@@ -31,10 +31,5 @@ public class CustomItemizedIconOverlay<Item extends OverlayItem> extends Itemize
         this.listItems = aList;
     }
 
-    @Override
-    public boolean addItem(final Item item) {
-        final boolean result = mItemList.add(item);
-        return result;
-    }
 
 }

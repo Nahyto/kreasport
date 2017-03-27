@@ -21,10 +21,9 @@ public class Parcours extends BaseItem {
     private List<Balise> baliseList;
     /**
      * This is the index of the next balise to get.
-     * Starts at 1 because 0 is the primary balise which marks the start
      * Use to save progression.
      */
-    private int baliseToTarget = 1;
+    private int baliseToTarget = 0;
     private long elapsedTimeMillis;
 
     public Parcours(String title, String description, int id) {
@@ -86,12 +85,15 @@ public class Parcours extends BaseItem {
      * @return the next balise from last time this was called. Starts at 0.
      */
     public Balise getNextBalise() {
-        baliseToTarget++;
-        return baliseList.get(baliseToTarget);
+        if (baliseToTarget < baliseList.size()) {
+            // return and then increment
+            return baliseList.get(baliseToTarget++);
+        }
+        return null;
     }
 
     /**
-     * The index of the balise to target. Starts at 1 because the first (0) is the primary balise which marks the start
+     * The index of the balise to target.
      *
      * @return
      */
@@ -111,5 +113,9 @@ public class Parcours extends BaseItem {
     public long getElapsedTimeMillis() {
         Log.d(LOG, "getting time for parcours: " + id + " -> " + elapsedTimeMillis);
         return elapsedTimeMillis;
+    }
+
+    public void incrementTargetBalise() {
+        baliseToTarget++;
     }
 }

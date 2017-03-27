@@ -40,10 +40,7 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import fr.univ_lille1.iut_info.caronic.mapsv3.R;
@@ -65,7 +62,7 @@ import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_DIS
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_TIME_BETWEEN_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getDummyParcours;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getParcoursFromDownload;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.mainParcoursBalisesToOverlayList;
+import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.getOverlayFromParours;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils.restoreParcoursListFromOSM;
 
 /**
@@ -185,7 +182,7 @@ public class OSMFragment extends Fragment {
         GeoPoint point = new GeoPoint(defaultPoint);
         mMapView.getController().setCenter(point);
 
-        intializeParcoursAndOverlay(true, -1);
+        intializeParcoursAndOverlay(true, -1, parcoursStarted);
         basicMapSetup();
         restoreSavedPosition();
 
@@ -387,7 +384,7 @@ public class OSMFragment extends Fragment {
      * Call this every time we setup the map (so even at rotations). The data does not need to be saved directly as it is already present in SharedPrefrences.
      * Initializes the parcours list from SharedPreferences. If not empty, initializes the overlay for the parcours and the background overlay.
      */
-    public void intializeParcoursAndOverlay(boolean includeDummy, int focusOnParcours) {
+    public void intializeParcoursAndOverlay(boolean includeDummy, int focusOnParcours, boolean parcoursStarted) {
 
         parcoursList = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
 
@@ -401,7 +398,7 @@ public class OSMFragment extends Fragment {
         }
 
         if (parcoursList != null) {
-            initParcoursOverlay();
+            initParcoursOverlay(parcoursStarted);
             initBackgroundOverlay();
         } else {
             Log.d(LOG, "No parcours in sharedprefs");
@@ -420,10 +417,10 @@ public class OSMFragment extends Fragment {
     /**
      * Creates an overlay from the parcoursList and adds it to the MapView.
      */
-    private void initParcoursOverlay() {
+    private void initParcoursOverlay(boolean parcoursStarted) {
         final List<CustomOverlayItem> firstBalisesInParcoursList = new ArrayList<>();
 
-        firstBalisesInParcoursList.addAll(mainParcoursBalisesToOverlayList(parcoursList));
+        firstBalisesInParcoursList.addAll(getOverlayFromParours(parcoursList, parcoursStarted));
 
         Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " primary balises");
 
@@ -465,7 +462,9 @@ public class OSMFragment extends Fragment {
         MapEventsOverlay mMapEventOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                dismissParcoursInfo();
+                if (!parcoursStarted) {
+                    dismissParcoursInfo();
+                }
                 return true;
             }
 
@@ -620,16 +619,18 @@ public class OSMFragment extends Fragment {
 
     private void toggleBottomSheetParcoursState(boolean start) {
         if (start) {
+            parcoursStarted = true;
+
             currentParcoursId = focusedOverlayItem.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(false, currentParcoursId);
+            focusOnParcours(false, currentParcoursId, parcoursStarted);
 
             Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
 
             // offset the start by how much time has already passed last time the parcours was started
             chronometer.setBase(SystemClock.elapsedRealtime() - currentParcours.getElapsedTimeMillis());
 
-            // TODO restore progression
+            // TODO receiver for next balise location alert
 
             fab.setVisibility(GONE);
             bottomSheetMain.setVisibility(GONE);
@@ -638,9 +639,9 @@ public class OSMFragment extends Fragment {
 
             chronometer.start();
             Toast.makeText(getContext(), "Starting parcours!", Toast.LENGTH_SHORT).show();
-
-            parcoursStarted = true;
         } else {
+            parcoursStarted = false;
+
             chronometer.stop();
             saveTimeForParcours();
             saveParcoursListToPrefs();
@@ -648,14 +649,12 @@ public class OSMFragment extends Fragment {
             // TODO save progression
 
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(true, -1);
+            focusOnParcours(true, -1, parcoursStarted);
 
             fab.setVisibility(VISIBLE);
             bottomSheetMain.setVisibility(View.VISIBLE);
             bottomSheetActive.setVisibility(GONE);
             Toast.makeText(getContext(), "Stopped parcours!", Toast.LENGTH_SHORT).show();
-
-            parcoursStarted = false;
         }
     }
 
@@ -667,26 +666,41 @@ public class OSMFragment extends Fragment {
         currentParcours.setElapsedTimeMillis(elapsedMillis);
     }
 
-    private void focusOnParcours(boolean includeDummy, int parcoursId) {
+    private void focusOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {
         mMapView.getOverlays().remove(mParcoursOverlay);
         mMapView.invalidate();
-        intializeParcoursAndOverlay(includeDummy, parcoursId);
+        intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
 
         Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
-        if (currentParcours.getBaliseToTarget() == 1) {
+        // initial target is primary balise at index 0 which is already shown
+        // therefore we need to show the next one once we start
+        if (parcoursStarted && currentParcours.getBaliseToTarget() == 0) {
             revealNextBalise(parcoursId);
         }
     }
 
     // TODO show next balise, add location alert, broadcast receiver...
 
+    /*
     private void revealNextBalise(int parcoursId) {
         Parcours parcours = parcoursList.getParcoursById(parcoursId);
         Balise nextBalise = parcours.getNextBalise();
+        if (nextBalise != null) {
 
-        mParcoursOverlay.addItem(nextBalise.toCustomOverlayItem());
-        Log.d(LOG, "addded balise: " + nextBalise.getId() + " from parcours: "
-                + nextBalise.getParcoursId() + ", " + nextBalise.getTitle());
+            mParcoursOverlay.addItem(nextBalise.toCustomOverlayItem());
+            mMapView.invalidate();
+            Log.d(LOG, "addded balise: " + nextBalise.getId() + " from parcours: "
+                    + nextBalise.getParcoursId() + ", " + nextBalise.getTitle());
+        } else {
+            Log.d(LOG, "no next balise, reached last one already");
+        }
+    }
+    */
 
+    private void revealNextBalise(int parcoursId) {
+        Parcours parcours = parcoursList.getParcoursById(parcoursId);
+        parcours.incrementTargetBalise();
+        saveParcoursListToPrefs();
+        focusOnParcours(false, parcoursId, parcoursStarted);
     }
 }

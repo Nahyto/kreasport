@@ -158,7 +158,7 @@ public class Utils {
      * @param parcoursList
      * @return
      */
-    public static List<CustomOverlayItem> mainParcoursBalisesToOverlayList(ParcoursList parcoursList) {
+    public static List<CustomOverlayItem> getOverlayFromParours(ParcoursList parcoursList, boolean parcoursStarted) {
         Log.d(LOG, "converting parcours to overlay items");
 
         List<CustomOverlayItem> overlayItemsList = new ArrayList<>();
@@ -171,6 +171,17 @@ public class Utils {
 
             overlayItemsList.add(item);
             Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
+
+            if (parcoursStarted) {
+                for (int i = 1; i < parcours.getBaliseToTarget(); i++) {
+                    Balise balise = parcours.getBaliseList().get(i);
+                    point = balise.toGeoPoint();
+                    item = new CustomOverlayItem(balise.getTitle(), balise.getDescription(), point, parcours.getId(), balise.getId());
+
+                    overlayItemsList.add(item);
+                    Log.d(LOG, "for parcours " + parcours.getId() + " added target balise: " + balise.getId() + ", " + balise.getTitle());
+                }
+            }
         }
         return overlayItemsList;
     }
@@ -186,7 +197,7 @@ public class Utils {
         Balise balise = new Balise("IUT A : Balise 1", "Début de l'aventure !", new GeoPoint(50.6137196, 3.1367387), -10, 0);
         parcours.addBalise(balise);
 
-        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.6137296, 3.1367387), -10, 1);
+        balise = new Balise("IUT A : Balise 2", "Bravo l'aventure continue", new GeoPoint(50.613465, 3.137428), -10, 1);
         parcours.addBalise(balise);
 
         parcoursList.add(parcours);

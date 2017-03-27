@@ -130,4 +130,17 @@ public class Parcours extends BaseItem {
     public boolean isPrimarybalise(int baliseId) {
         return getBaliseList().get(0).getId() == baliseId;
     }
+
+    public int getNumberOfBalises() {
+        return baliseList.size();
+    }
+
+    public int getBaliseIndex(int id) {
+        for (int i=0;i<baliseList.size();i++) {
+            if (baliseList.get(i).getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

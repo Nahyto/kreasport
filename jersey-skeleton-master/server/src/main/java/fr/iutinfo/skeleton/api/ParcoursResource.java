@@ -5,6 +5,7 @@ import static fr.iutinfo.skeleton.api.BDDFactory.tableExist;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
@@ -45,7 +46,7 @@ public class ParcoursResource {
 			dao.dropParcoursTable();
 		}*/
 		ParcoursResource p = new ParcoursResource();
-		//dao.insert(new Parcours(1, "Chasse au trésor", "5648413254654dsfgsdfg"));
+		//dao.insert(new Parcours(1,"name"));
 		System.out.println(dao.all());
 	}
     
@@ -55,6 +56,7 @@ public class ParcoursResource {
     @POST
     public ParcoursDto createParcours(ParcoursDto dto) {
         Parcours user = new Parcours();
+        dto.setkey(UUID.randomUUID().toString());
         user.initFromDto(dto);
         int id = dao.insert(user);
         dto.setId(id);
@@ -87,6 +89,7 @@ public class ParcoursResource {
 			parcoursList = dao.all();
 			for (Parcours parcours : parcoursList) {
 				parcours.setBaliseList(daoBalise.allFromParcours(parcours.getId()));
+				System.out.println(dao.keyById(1));
 			}
         } else {
             logger.debug("Search users with query: " + query);

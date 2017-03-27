@@ -7,12 +7,59 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="1"
+        android:gravity="center_horizontal">
+
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/hello_blank_fragment" />
+            android:layout_height="200px" />
+
+        <TextView
+            android:text="KREASPORT"
+            android:layout_width="match_parent"
+            android:layout_height="100px"
+            android:textSize="36sp"
+            android:textStyle="normal|bold|italic"
+            android:textColor="@color/teal"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="200px" />
+
+        <TextView
+            android:text="Entrez votre clé unique pour accéder à votre parcours : "
+            android:layout_width="match_parent"
+            android:layout_height="39dp"
+            android:textAlignment="center"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/cle"
+            android:layout_width="303dp"
+            android:layout_height="38dp"
+            android:textAlignment="center"
+            android:background="@drawable/back"
+            android:layout_weight="0.03" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50px" />
+
+        <Button
+            android:text="Valider"
+            android:layout_height="100px"
+            android:id="@+id/clebutton"
+            android:layout_width="200px"
+            android:textSize="14sp"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="300px" />
 
         <Button
             android:onClick="downloadJson"

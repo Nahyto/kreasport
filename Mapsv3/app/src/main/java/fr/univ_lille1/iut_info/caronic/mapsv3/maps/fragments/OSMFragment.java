@@ -156,6 +156,7 @@ public class OSMFragment extends Fragment {
         setupMapView(fragmentView);
 
         setupBottomSheet(fragmentView);
+        toggleBottomSheetParcoursState(parcoursStarted);
 
         return fragmentView;
     }
@@ -267,6 +268,8 @@ public class OSMFragment extends Fragment {
      * Restores intialPoint, mMapOptions and zoom from arguments
      */
     private void restoreArguments() {
+        Log.d(LOG, "restore arguments");
+
         defaultPoint = (GeoPoint) getArguments().getSerializable(KEY_DEFAULT_POINT);
 
         String initalPointJson = getActivity()
@@ -285,12 +288,17 @@ public class OSMFragment extends Fragment {
                 .getString(KEY_CURRENT_BALISE, "");
         if (!currentBaliseJson.equals("")) {
             currentBalise = new Gson().fromJson(currentBaliseJson, Balise.class);
+            Log.d(LOG, "restored current balise");
+        } else {
+            Log.d(LOG, "couldnt restore current balise");
         }
 
 
         mMapOptions = (MapOptions) getArguments().getSerializable(KEY_MAP_OPTIONS);
         zoom = getArguments().getInt(KEY_ZOOM);
         animatedToSavedLocation = getArguments().getBoolean(KEY_ANIMATED_TO_SAVED_LOCATION);
+
+        Log.d(LOG, "done restore args\n");
     }
 
     /**
@@ -378,16 +386,6 @@ public class OSMFragment extends Fragment {
 
     }
 
-    @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        Log.d(LOG, "onsaveinstance");
-
-        saveCurrentPosition();
-        saveParcoursListToPrefs();
-        saveCurrentBalise();
-        super.onSaveInstanceState(outState);
-    }
-
     private void saveCurrentBalise() {
         if (currentBalise != null) {
             Log.d(LOG, "saving current balise to prefs: " + currentBalise.getId());
@@ -412,6 +410,19 @@ public class OSMFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        Log.d(LOG, "onsaveinstance");
+
+        saveTimeForParcours();
+        saveCurrentPosition();
+        saveParcoursListToPrefs();
+        saveCurrentBalise();
+
+        Log.d(LOG, "DONE onsaveinstace");
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onPause() {
         // unregister receiver
         super.onPause();
@@ -421,9 +432,12 @@ public class OSMFragment extends Fragment {
     public void onStop() {
         Log.d(LOG, "onStop");
 
+        saveTimeForParcours();
         saveCurrentPosition();
         saveParcoursListToPrefs();
         saveCurrentBalise();
+
+        Log.d(LOG, "DONE onstop");
         super.onStop();
     }
 
@@ -769,11 +783,16 @@ public class OSMFragment extends Fragment {
     }
 
     private void saveTimeForParcours() {
-        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        if (currentBalise != null) {
+            Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
 
-        long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
+            long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
 
-        currentParcours.setElapsedTimeMillis(elapsedMillis);
+            currentParcours.setElapsedTimeMillis(elapsedMillis);
+            Log.d(LOG, "saving time for parcours: " + currentParcours.getId() + " -> " + elapsedMillis);
+        } else {
+            Log.d(LOG, "couldnt save time for currentParcours bc currentBalise null");
+        }
     }
 
     private void focusOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {

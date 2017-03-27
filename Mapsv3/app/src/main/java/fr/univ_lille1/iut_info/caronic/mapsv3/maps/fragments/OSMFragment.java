@@ -554,6 +554,8 @@ public class OSMFragment extends Fragment {
      * @param balise
      */
     private void setBottomSheetInfoToParcours(Balise balise) {
+        Log.d(LOG, "set bottom sheet info to parcours");
+
         TextView tvTitle = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_title);
         TextView tvDesc = (TextView) bottomSheet.findViewById(R.id.bottom_sheet_description);
 
@@ -565,11 +567,33 @@ public class OSMFragment extends Fragment {
         if (parcoursStarted) {
             bottomSheetMain.setVisibility(GONE);
             bottomSheetActive.setVisibility(VISIBLE);
-            fab.setVisibility(View.GONE);
         } else {
-            fab.setVisibility(View.VISIBLE);
             bottomSheetMain.setVisibility(VISIBLE);
             bottomSheetActive.setVisibility(GONE);
+        }
+
+        bottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bottomSheet.getVisibility() == VISIBLE) {
+                    if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    } else {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
+                }
+            }
+        });
+
+        if (currentBalise != null) {
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours != null && !parcoursStarted && parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+        } else {
+            fab.setVisibility(GONE);
         }
     }
 
@@ -582,11 +606,20 @@ public class OSMFragment extends Fragment {
         if (hide) {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.INVISIBLE);
-            fab.setVisibility(View.GONE);
         } else {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheet.setVisibility(View.VISIBLE);
-            fab.setVisibility(View.VISIBLE);
+        }
+
+        if (currentBalise != null) {
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours != null && !parcoursStarted && parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+        } else {
+            fab.setVisibility(GONE);
         }
     }
 
@@ -722,7 +755,13 @@ public class OSMFragment extends Fragment {
             mParcoursOverlay.unSetFocusedItem();
             focusOnParcours(true, -1, parcoursStarted);
 
-            fab.setVisibility(VISIBLE);
+            Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcours.isPrimarybalise(currentBalise.getId())) {
+                fab.setVisibility(VISIBLE);
+            } else {
+                fab.setVisibility(GONE);
+            }
+
             bottomSheetMain.setVisibility(View.VISIBLE);
             bottomSheetActive.setVisibility(GONE);
             Toast.makeText(getContext(), "Stopped parcours!", Toast.LENGTH_SHORT).show();
@@ -779,9 +818,33 @@ public class OSMFragment extends Fragment {
             } else {
                 Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
                 Log.d(LOG, "reached next balise: " + baliseToTarget.getId() + " for parcours: " + baliseToTarget.getParcoursId());
+                doActionReachedBalise();
                 revealNextBalise(currentBalise.getParcoursId());
             }
         }
 
+    }
+
+    private void doActionReachedBalise() {
+        Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        if (parcours.isBaliseLastOne(currentBalise.getId())) {
+            validateEndParcours();
+        } else {
+            revealNextBalise(currentBalise.getParcoursId());
+        }
+    }
+
+    private void validateEndParcours() {
+        parcoursStarted = false;
+
+        chronometer.stop();
+        saveTimeForParcours();
+        saveParcoursListToPrefs();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Congratulations! You have reached the last balise!")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
     }
 }

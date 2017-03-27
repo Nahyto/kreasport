@@ -122,4 +122,12 @@ public class Parcours extends BaseItem {
     public void incrementTargetBalise() {
         baliseToTarget++;
     }
+
+    public boolean isBaliseLastOne(int baliseId) {
+        return getBaliseList().get(baliseList.size()-1).getId() == baliseId;
+    }
+
+    public boolean isPrimarybalise(int baliseId) {
+        return getBaliseList().get(0).getId() == baliseId;
+    }
 }

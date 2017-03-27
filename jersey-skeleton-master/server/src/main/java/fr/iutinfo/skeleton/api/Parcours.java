@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,12 @@ public class Parcours implements Principal {
 	private List<Balise> baliseList;
 	private String description = "";
 
-	public Parcours(int id, String name) throws SQLException {
+	public Parcours(int id, String name ) throws SQLException {
 		this.id = id;
 		this.name = name;
 		baliseList = new ArrayList<>();
+		UUID uuid = UUID.randomUUID();
+		key = uuid.toString();
 	}
 
 	public Parcours(int id, String name, String key) throws SQLException {

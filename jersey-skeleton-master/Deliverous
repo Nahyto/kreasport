@@ -1,6 +1,0 @@
-java:
-  image: nahyto/kreasport
-  ports:
-  - ip: 51.255.131.189
-    container_port: 8080
-    host_port: 80

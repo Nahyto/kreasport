@@ -761,9 +761,10 @@ public class OSMFragment extends Fragment {
         intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
 
         Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+
         // initial target is primary balise at index 0 which is already shown
         // therefore we need to show the next one once we start
-        if (parcoursStarted && currentParcours.getBaliseToTarget() == 0) {
+        if (currentParcours != null && parcoursStarted && currentParcours.getBaliseToTarget() == 0 ) {
             revealNextBalise(parcoursId);
         }
     }

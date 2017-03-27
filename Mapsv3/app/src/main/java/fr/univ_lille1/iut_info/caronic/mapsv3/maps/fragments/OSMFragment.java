@@ -1,10 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -54,7 +51,6 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.ACTION_PROXIMITY_ALERT;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_DISTANCECHANGE_FOR_UPDATE;
 import static fr.univ_lille1.iut_info.caronic.mapsv3.other.Constants.MINIMUM_TIME_BETWEEN_UPDATE;
@@ -91,6 +87,7 @@ public class OSMFragment extends Fragment {
     public static final String KEY_PARCOURS_LIST = "mapsv3.osm_frag.parcours_list";
     private static final String KEY_PARCOURS_STARTED = "mapsv3.osm_frag.parcours_started";
     private static final String KEY_CURRENT_BALISE = "mapsv3.osm_frag.current_balise";
+    private static final String KEY_PARCOURS_FINISHED = "mapsv3.osm_frag.parcours_finished";
 
     private static GeoPoint defaultPoint;
     private static GeoPoint savedPoint;
@@ -115,6 +112,7 @@ public class OSMFragment extends Fragment {
     private Chronometer chronometer;
     private RatingBar ratingBar;
     private TextView progression;
+    private Button cancel;
 
 
     private boolean parcoursStarted;
@@ -156,7 +154,9 @@ public class OSMFragment extends Fragment {
         setupMapView(fragmentView);
 
         setupBottomSheet(fragmentView);
-        toggleBottomSheetParcoursState(parcoursStarted);
+        if (currentBalise != null) { // restore bottom sheet on rotate
+            toggleBottomSheetParcoursState(parcoursStarted);
+        }
 
         return fragmentView;
     }
@@ -208,17 +208,12 @@ public class OSMFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startStopParcours();
+                toggleParcoursState();
             }
         });
 
-        Button cancel = (Button) parentView.findViewById(R.id.bottom_sheet_cancel_button);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startStopParcours();
-            }
-        });
+        cancel = (Button) parentView.findViewById(R.id.bottom_sheet_cancel_button);
+        setCancelClickListener(true);
 
         chronometer = (Chronometer) parentView.findViewById(R.id.bottom_sheet_chronometer);
         ratingBar = (RatingBar) parentView.findViewById(R.id.bottom_sheet_ratingBar);
@@ -477,12 +472,30 @@ public class OSMFragment extends Fragment {
     private void saveParcoursListToPrefs() {
         Log.d(LOG, "saving parcours list to prefs");
 
-        String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
-        getActivity()
-                .getPreferences(Context.MODE_PRIVATE)
-                .edit()
-                .putString(KEY_PARCOURS_LIST, parcoursListJson)
-                .commit();
+        ParcoursList alreadySaved = restoreParcoursListFromOSM(getActivity().getPreferences(Context.MODE_PRIVATE));
+        if (alreadySaved != null) {
+            int savedProgression = alreadySaved.getParcoursById(currentBalise.getParcoursId()).getBaliseToTargetIndex();
+            int currentProgression = parcoursList.getParcoursById(currentBalise.getParcoursId()).getBaliseToTargetIndex();
+            if (currentProgression >= savedProgression) {
+                Log.d(LOG, "SAVED parcoursList with focused parcours: " + currentBalise.getParcoursId() + " progression = " + parcoursList.getParcoursById(currentBalise
+                        .getParcoursId()).getBaliseToTargetIndex());
+                String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
+                getActivity()
+                        .getPreferences(Context.MODE_PRIVATE)
+                        .edit()
+                        .putString(KEY_PARCOURS_LIST, parcoursListJson)
+                        .commit();
+            }
+        } else {
+            Log.d(LOG, "SAVED parcoursList with focused parcours: " + currentBalise.getParcoursId() + " progression = " + parcoursList.getParcoursById(currentBalise
+                    .getParcoursId()).getBaliseToTargetIndex());
+            String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
+            getActivity()
+                    .getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_PARCOURS_LIST, parcoursListJson)
+                    .commit();
+        }
     }
 
     /**
@@ -559,6 +572,8 @@ public class OSMFragment extends Fragment {
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheet.setVisibility(View.INVISIBLE);
+        bottomSheetActive.setVisibility(View.INVISIBLE);
+        bottomSheetMain.setVisibility(View.INVISIBLE);
         fab.setVisibility(View.GONE);
     }
 
@@ -637,32 +652,47 @@ public class OSMFragment extends Fragment {
         }
     }
 
-    public void startStopParcours() {
-        if (parcoursStarted) {
-            new ParcoursConfirmation().show(false);
-        } else {
-            setParcoursAsTarget();
-        }
-    }
 
     /**
      * Called when the bottom sheet if alrady populated with info from clicking a primary balise.
      * Called on fab start click.
-     * Sets the parcours as the target for the user.
      */
-    public void setParcoursAsTarget() {
-        Log.d(LOG, "setting parcours as target");
-
+    private void toggleParcoursState() {
         if (currentBalise != null) {
-            int parcoursId = currentBalise.getParcoursId();
+            Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            if (parcoursStarted) {
+                Log.d(LOG, "toggling parcours state, want to stop");
+                // stop
+                showParcoursConfirmation(false, null);
+            } else {
+                // start from fab
 
-            Balise primaryBalise = parcoursList.getParcoursById(parcoursId).getPrimaryBalise();
+                Log.d(LOG, "want to start parcours: " + currentParcours.getId() + " current state: " + currentParcours.getStateName());
 
-            if (verifyStartPossibility(primaryBalise)) {
-                // Use the Builder class for convenient dialog construction
-                new ParcoursConfirmation().show(true);
+                if (verifyStartPossibility(currentBalise)) {
+                    showParcoursConfirmation(true, currentParcours);
+                }
             }
+        } else {
+            Log.d(LOG, "Error: expected currentBalise to be non null after a fab click");
         }
+    }
+
+    private void showDismissalOnParcoursFinished() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Do you want to return to the parcours view?")
+                .setPositiveButton("Yes, please", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dismissParcoursInfo();
+                        focusOverlayOnParcours(true, -1, false);
+                    }
+                })
+                .setNegativeButton("Not yet", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                }).show();
     }
 
     /**
@@ -673,6 +703,7 @@ public class OSMFragment extends Fragment {
     private boolean verifyStartPossibility(Balise primaryBalise) {
         if (currentLocation == null) {
             Toast.makeText(getContext(), "Couldn't verify your present location", Toast.LENGTH_SHORT).show();
+            Log.d(LOG, "couldnt verify current location to verify proximity to start");
             return false;
         }
 
@@ -691,64 +722,94 @@ public class OSMFragment extends Fragment {
 
         if (distanceRounded > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
             Toast.makeText(getContext(), "You are " + distanceRounded + "m away from the parcours!", Toast.LENGTH_SHORT).show();
-            Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+            Log.d(LOG, "Outside, distance from center: " + distanceTo + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
             return false;
         }
 
-        Log.d(LOG, "Inside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+        Log.d(LOG, "Inside, distance from center: " + distanceTo + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
 
         return true;
     }
 
-    private class ParcoursConfirmation {
 
-        private void show(boolean start) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            if (start) {
-                builder.setMessage("Do you really want to start the parcours now?")
-                        .setPositiveButton("Yes please", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                toggleBottomSheetParcoursState(true);
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                            }
-                        });
-            } else {
-                builder.setMessage("Do you really want to pause the parcours?")
-                        .setPositiveButton("Yes, pause it", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                toggleBottomSheetParcoursState(false);
-                            }
-                        })
-                        .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                            }
-                        });
+    private void showParcoursConfirmation(boolean start, final Parcours parcours) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        if (start) {
+            if (parcours.getState() == Parcours.STATE_NEW) {
+                builder.setMessage("Do you really want to start the parcours now?\nThe timer will start right away");
+            } else if (parcours.getState() == Parcours.STATE_NOT_FINISHED) {
+                builder.setMessage("Do you want to resume this parcours? Your progression will be restored.");
+            } else if (parcours.getState() == Parcours.STATE_IS_FINISHED) {
+                builder.setMessage("Do you want to retry this parcours?\nWarning! Your progression will be erased.");
             }
-            builder.show();
+            builder
+                    .setPositiveButton("Yes, please", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (parcours.getState() == Parcours.STATE_NEW) {
+                                parcours.setState(Parcours.STATE_NOT_FINISHED);
+                                Log.d(LOG, "START parcours");
+
+                                refreshBottomSheetProgression();
+                                setCancelClickListener(true);
+                                Log.d(LOG, "confirmed start, changed state to " + parcours.getStateName());
+                            } else if (parcours.getState() == Parcours.STATE_IS_FINISHED) {
+                                parcours.setState(Parcours.STATE_NEW);
+                                parcours.resetProgression();
+                                setCancelClickListener(false);
+                                Log.d(LOG, "START parcours, reset progression");
+                            } else {
+                                Log.d(LOG, "RESUME parcours");
+                            }
+                            toggleBottomSheetParcoursState(true);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+        } else {
+            builder.setMessage("Do you really want to pause the parcours?")
+                    .setPositiveButton("Yes, pause it", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Log.d(LOG, "PAUSE parcours");
+                            toggleBottomSheetParcoursState(false);
+                            saveParcoursListToPrefs();
+                        }
+                    })
+                    .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
         }
+        builder.show();
     }
 
+
+    /**
+     * Toggles the bottom sheet main/active state
+     *
+     * @param start if should switch to active view
+     */
     private void toggleBottomSheetParcoursState(boolean start) {
         Log.d(LOG, "toggling bottomsheet state");
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+
+        if (start && currentParcours.getBaliseToTargetIndex() == Parcours.STATE_IS_FINISHED) {
+            currentParcours.resetProgression();
+        }
+
         if (start) {
             parcoursStarted = true;
 
             int currentParcoursId = currentBalise.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(true, currentParcoursId, true);
-
-            Parcours currentParcours = parcoursList.getParcoursById(currentParcoursId);
+            focusOverlayOnParcours(true, currentParcoursId, true);
 
             // offset the start by how much time has already passed last time the parcours was started
             long base = SystemClock.elapsedRealtime() - currentParcours.getElapsedTimeMillis();
             chronometer.setBase(base);
-
-            // TODO receiver for next balise location alert
 
             fab.setVisibility(GONE);
             bottomSheetMain.setVisibility(GONE);
@@ -764,10 +825,8 @@ public class OSMFragment extends Fragment {
             saveTimeForParcours();
             saveParcoursListToPrefs();
 
-            // TODO save progression
-
             mParcoursOverlay.unSetFocusedItem();
-            focusOnParcours(true, -1, parcoursStarted);
+            focusOverlayOnParcours(true, -1, parcoursStarted);
 
             Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
             if (parcours.isPrimarybalise(currentBalise.getId())) {
@@ -795,20 +854,31 @@ public class OSMFragment extends Fragment {
         }
     }
 
-    private void focusOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {
-        Log.d(LOG, "focusing on parcours: " + parcoursId);
-        saveParcoursListToPrefs();
+    /**
+     * Reinstanciates the overlay with only the selected parcours, up to its current progression.
+     *
+     * @param includeDummy
+     * @param parcoursId
+     * @param parcoursStarted
+     */
+    private void focusOverlayOnParcours(boolean includeDummy, int parcoursId, boolean parcoursStarted) {
+        if (currentBalise != null) {
+            Log.d(LOG, "focusing on parcours: " + parcoursId);
+            saveParcoursListToPrefs();
 
-        mMapView.getOverlays().remove(mParcoursOverlay);
-        mMapView.invalidate();
-        intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
+            mMapView.getOverlays().remove(mParcoursOverlay);
+            mMapView.invalidate();
+            intializeParcoursAndOverlay(includeDummy, parcoursId, parcoursStarted);
 
-        Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
 
-        // initial target is primary balise at index 0 which is already shown
-        // therefore we need to show the next one once we start
-        if (currentParcours != null && parcoursStarted && currentParcours.getBaliseToTarget() == 0 ) {
-            revealNextBalise(parcoursId);
+            // initial target is primary balise at index 0 which is already shown
+            // therefore we need to show the next one once we start
+            if (currentParcours != null && parcoursStarted && currentParcours.getBaliseToTargetIndex() == 0) {
+                revealNextBalise(parcoursId);
+            }
+        } else {
+            Log.d(LOG, "could not focus on parcours, currentBalise is null");
         }
     }
 
@@ -821,14 +891,16 @@ public class OSMFragment extends Fragment {
         Log.d(LOG, "will reload the overlay");
         Parcours parcours = parcoursList.getParcoursById(parcoursId);
         parcours.incrementTargetBalise();
+
+        Log.d(LOG, "the target is now balise: " + parcours.getBaliseToTargetIndex());
         saveParcoursListToPrefs();
-        focusOnParcours(true, parcoursId, parcoursStarted);
+        focusOverlayOnParcours(true, parcoursId, parcoursStarted);
     }
 
     private void verifyNearTargetBalise() {
         if (currentBalise != null) {
-            Log.d(LOG, "veryfying near target balise");
             Balise baliseToTarget = parcoursList.getParcoursById(currentBalise.getParcoursId()).getBaliseToTarget();
+            Log.d(LOG, "veryfying near target balise: " + baliseToTarget.getId());
 
             Location destLocation = new Location("");
             destLocation.setLatitude(baliseToTarget.getLatitude());
@@ -838,10 +910,8 @@ public class OSMFragment extends Fragment {
             int distanceRounded = Math.round(distance);
 
             if (distance > MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) {
-                Log.d(LOG, "too far by " + (distanceRounded - MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS) + "m");
-                Log.d(LOG, "Outside, distance from center: " + distanceRounded + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
+                Log.d(LOG, "Outside, distance from center: " + distance + " limit: " + MAXIMUM_DISTANCE_TO_ACTIVATE_PARCOURS);
             } else {
-                Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
                 Log.d(LOG, "reached next balise: " + baliseToTarget.getId() + " for parcours: " + baliseToTarget.getParcoursId());
                 doActionReachedBalise();
             }
@@ -851,34 +921,76 @@ public class OSMFragment extends Fragment {
 
     private void doActionReachedBalise() {
         Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
-        if (parcours.isBaliseLastOne(currentBalise.getId())) {
+        Balise currentTarget = parcours.getBaliseToTarget();
+
+        refreshBottomSheetProgression();
+
+        if (parcours.isBaliseLastOne(currentTarget.getId())) {
             validateEndParcours();
         } else {
+            Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
             revealNextBalise(currentBalise.getParcoursId());
-            incrementBottomSheetProgression();
         }
     }
 
-    private void incrementBottomSheetProgression() {
+    /**
+     * Updates bottom_sheet_active_progression. Call before revealing the next balise because the progression relies upon the target balise index.
+     */
+    private void refreshBottomSheetProgression() {
         Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
         int max = currentParcours.getNumberOfBalises();
-        int currentIndex = currentParcours.getBaliseIndex(currentBalise.getId());
+        int currentIndex = currentParcours.getBaliseToTargetIndex();
         if (max > 0 && currentIndex >= 0) {
-            progression.setText("" + (currentIndex+1) + "/" + max);
+            String progressionStr = "" + (currentIndex + 1) + "/" + max;
+            progression.setText(progressionStr);
+            Log.d(LOG, "got index: " + currentIndex + " and max: " + max + " -> " + progressionStr);
         }
     }
 
+    /**
+     * Call to stop the parcours.
+     */
     private void validateEndParcours() {
+        Log.d(LOG, "validating end of parcours");
         parcoursStarted = false;
 
         chronometer.stop();
         saveTimeForParcours();
+
+        Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+        parcours.setState(Parcours.STATE_IS_FINISHED);
+
         saveParcoursListToPrefs();
+
+        setCancelClickListener(false);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage("Congratulations! You have reached the last balise!")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                     }
-                });
+                }).show();
+
+    }
+
+    /**
+     * @param setCancel cancel or dismiss
+     */
+    private void setCancelClickListener(boolean setCancel) {
+        if (setCancel) {
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleParcoursState();
+                }
+            });
+        } else {
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showDismissalOnParcoursFinished();
+                }
+            });
+        }
     }
 }

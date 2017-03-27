@@ -16,6 +16,10 @@ public class Parcours extends BaseItem {
 
     private final static String LOG = Parcours.class.getSimpleName();
 
+    public final static int STATE_NEW = 0;
+    public final static int STATE_NOT_FINISHED = STATE_NEW + 1;
+    public final static int STATE_IS_FINISHED = STATE_NOT_FINISHED + 1;
+
     private String key;
     @SerializedName("baliseDtoList")
     private List<Balise> baliseList;
@@ -25,6 +29,8 @@ public class Parcours extends BaseItem {
      */
     private int baliseToTarget = 0;
     private long elapsedTimeMillis;
+    private int state;
+    private int tries;
 
     public Parcours(String title, String description, int id) {
         super(title, description, id);
@@ -36,6 +42,7 @@ public class Parcours extends BaseItem {
                 return true;
             }
         };
+        this.state = STATE_NEW;
     }
 
     public String getKey() {
@@ -98,6 +105,7 @@ public class Parcours extends BaseItem {
      * @return
      */
     public int getBaliseToTargetIndex() {
+        Log.d(LOG, "getBaliseToTargetIndex " + baliseToTarget);
         return baliseToTarget;
     }
 
@@ -119,12 +127,22 @@ public class Parcours extends BaseItem {
         return elapsedTimeMillis;
     }
 
-    public void incrementTargetBalise() {
-        baliseToTarget++;
+    /**
+     * Increments the target balise of possible
+     *
+     * @return if target balise is NOT the last one
+     */
+    public boolean incrementTargetBalise() {
+        if (baliseToTarget < baliseList.size() - 1) {
+            baliseToTarget++;
+            Log.d(LOG, "incremented target balise to index: " + baliseToTarget);
+            return true;
+        }
+        return false;
     }
 
     public boolean isBaliseLastOne(int baliseId) {
-        return getBaliseList().get(baliseList.size()-1).getId() == baliseId;
+        return getBaliseList().get(baliseList.size() - 1).getId() == baliseId;
     }
 
     public boolean isPrimarybalise(int baliseId) {
@@ -136,11 +154,45 @@ public class Parcours extends BaseItem {
     }
 
     public int getBaliseIndex(int id) {
-        for (int i=0;i<baliseList.size();i++) {
+        for (int i = 0; i < baliseList.size(); i++) {
             if (baliseList.get(i).getId() == id) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+
+    /**
+     * Resets the target balise and elapsed time to 0;
+     * Increments the number of tries.
+     */
+    public void resetProgression() {
+        baliseToTarget = 1;
+        elapsedTimeMillis = 0;
+        tries++;
+    }
+
+    public int getTries() {
+        return tries;
+    }
+
+    public String getStateName() {
+        switch (state) {
+            case STATE_NEW:
+                return "STATE_NEW";
+            case STATE_NOT_FINISHED:
+                return "STATE_NOT_FINSIHED";
+            case STATE_IS_FINISHED:
+                return "STATE_IS_FINISHED";
+        }
+        return null;
     }
 }

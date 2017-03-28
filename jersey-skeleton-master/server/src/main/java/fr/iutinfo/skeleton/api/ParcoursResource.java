@@ -81,6 +81,12 @@ public class ParcoursResource {
         return user.convertToDto();
     }
     
+    @GET
+    @Path("/key/{id}")
+    public String getKey(@PathParam("id") int id){
+    	return dao.keyById(id);
+    }
+    
 
     @GET
     public List<ParcoursDto> getAllParcours(@QueryParam("q") String query) {

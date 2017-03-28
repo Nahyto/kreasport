@@ -476,16 +476,16 @@ public class OSMFragment extends Fragment {
         if (alreadySaved != null) {
             int savedProgression = alreadySaved.getParcoursById(currentBalise.getParcoursId()).getBaliseToTargetIndex();
             int currentProgression = parcoursList.getParcoursById(currentBalise.getParcoursId()).getBaliseToTargetIndex();
-            if (currentProgression >= savedProgression) {
-                Log.d(LOG, "SAVED parcoursList with focused parcours: " + currentBalise.getParcoursId() + " progression = " + parcoursList.getParcoursById(currentBalise
-                        .getParcoursId()).getBaliseToTargetIndex());
-                String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
-                getActivity()
-                        .getPreferences(Context.MODE_PRIVATE)
-                        .edit()
-                        .putString(KEY_PARCOURS_LIST, parcoursListJson)
-                        .commit();
-            }
+            //if (currentProgression >= savedProgression) {
+            Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
+            Log.d(LOG, "SAVED parcoursList with focused parcours: " + currentParcours.getId() + " state: " + currentParcours.getStateName() + " target index:" + currentParcours.getBaliseToTargetIndex());
+            String parcoursListJson = new Gson().toJson(parcoursList, ParcoursList.class);
+            getActivity()
+                    .getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_PARCOURS_LIST, parcoursListJson)
+                    .commit();
+            //}
         } else {
             Log.d(LOG, "SAVED parcoursList with focused parcours: " + currentBalise.getParcoursId() + " progression = " + parcoursList.getParcoursById(currentBalise
                     .getParcoursId()).getBaliseToTargetIndex());
@@ -504,7 +504,7 @@ public class OSMFragment extends Fragment {
     private void initParcoursOverlay(boolean parcoursStarted) {
         final List<CustomOverlayItem> firstBalisesInParcoursList = new ArrayList<>();
 
-        firstBalisesInParcoursList.addAll(getOverlayFromParours(parcoursList, parcoursStarted));
+        firstBalisesInParcoursList.addAll(getOverlayFromParours(getActivity(), parcoursList, parcoursStarted));
 
         Log.d(LOG, "there are " + firstBalisesInParcoursList.size() + " balises in the overlay");
 
@@ -667,7 +667,7 @@ public class OSMFragment extends Fragment {
             } else {
                 // start from fab
 
-                Log.d(LOG, "want to start parcours: " + currentParcours.getId() + " current state: " + currentParcours.getStateName());
+                Log.d(LOG, "want to start parcours: " + currentParcours.getId() + " current state: " + currentParcours.getStateName() + " target index: " + currentParcours.getBaliseToTargetIndex());
 
                 if (verifyStartPossibility(currentBalise)) {
                     showParcoursConfirmation(true, currentParcours);
@@ -684,6 +684,7 @@ public class OSMFragment extends Fragment {
                 .setPositiveButton("Yes, please", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dismissParcoursInfo();
+                        parcoursStarted = false;
                         focusOverlayOnParcours(true, -1, false);
                     }
                 })
@@ -748,13 +749,15 @@ public class OSMFragment extends Fragment {
                             if (parcours.getState() == Parcours.STATE_NEW) {
                                 parcours.setState(Parcours.STATE_NOT_FINISHED);
                                 Log.d(LOG, "START parcours");
+                                saveParcoursListToPrefs();
 
                                 refreshBottomSheetProgression();
                                 setCancelClickListener(true);
                                 Log.d(LOG, "confirmed start, changed state to " + parcours.getStateName());
                             } else if (parcours.getState() == Parcours.STATE_IS_FINISHED) {
-                                parcours.setState(Parcours.STATE_NEW);
+                                parcours.setState(Parcours.STATE_NOT_FINISHED);
                                 parcours.resetProgression();
+                                saveParcoursListToPrefs();
                                 setCancelClickListener(false);
                                 Log.d(LOG, "START parcours, reset progression");
                             } else {
@@ -796,9 +799,11 @@ public class OSMFragment extends Fragment {
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
 
+        /*
         if (start && currentParcours.getBaliseToTargetIndex() == Parcours.STATE_IS_FINISHED) {
             currentParcours.resetProgression();
         }
+        */
 
         if (start) {
             parcoursStarted = true;
@@ -806,6 +811,7 @@ public class OSMFragment extends Fragment {
             int currentParcoursId = currentBalise.getParcoursId();
             mParcoursOverlay.unSetFocusedItem();
             focusOverlayOnParcours(true, currentParcoursId, true);
+            refreshBottomSheetProgression();
 
             // offset the start by how much time has already passed last time the parcours was started
             long base = SystemClock.elapsedRealtime() - currentParcours.getElapsedTimeMillis();
@@ -923,25 +929,25 @@ public class OSMFragment extends Fragment {
         Parcours parcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
         Balise currentTarget = parcours.getBaliseToTarget();
 
-        refreshBottomSheetProgression();
 
         if (parcours.isBaliseLastOne(currentTarget.getId())) {
             validateEndParcours();
         } else {
             Toast.makeText(getContext(), "You have reached the next balise!", Toast.LENGTH_SHORT).show();
             revealNextBalise(currentBalise.getParcoursId());
+            refreshBottomSheetProgression();
         }
     }
 
     /**
-     * Updates bottom_sheet_active_progression. Call before revealing the next balise because the progression relies upon the target balise index.
+     * Updates bottom_sheet_active_progression. Call after revealing the next balise because the progression relies upon the target balise index.
      */
     private void refreshBottomSheetProgression() {
         Parcours currentParcours = parcoursList.getParcoursById(currentBalise.getParcoursId());
         int max = currentParcours.getNumberOfBalises();
         int currentIndex = currentParcours.getBaliseToTargetIndex();
         if (max > 0 && currentIndex >= 0) {
-            String progressionStr = "" + (currentIndex + 1) + "/" + max;
+            String progressionStr = "" + currentIndex + "/" + max;
             progression.setText(progressionStr);
             Log.d(LOG, "got index: " + currentIndex + " and max: " + max + " -> " + progressionStr);
         }
@@ -952,7 +958,8 @@ public class OSMFragment extends Fragment {
      */
     private void validateEndParcours() {
         Log.d(LOG, "validating end of parcours");
-        parcoursStarted = false;
+
+        // don't set parcoursStarted false here because we still want to focus on this parcours
 
         chronometer.stop();
         saveTimeForParcours();
@@ -961,6 +968,7 @@ public class OSMFragment extends Fragment {
         parcours.setState(Parcours.STATE_IS_FINISHED);
 
         saveParcoursListToPrefs();
+        focusOverlayOnParcours(true, parcours.getId(), parcoursStarted);
 
         setCancelClickListener(false);
 

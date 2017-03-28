@@ -105,16 +105,12 @@ public class Parcours extends BaseItem {
      * @return
      */
     public int getBaliseToTargetIndex() {
-        Log.d(LOG, "getBaliseToTargetIndex " + baliseToTarget);
+        //Log.d(LOG, "getBaliseToTargetIndex " + baliseToTarget);
         return baliseToTarget;
     }
 
     public Balise getBaliseToTarget() {
         return baliseList.get(baliseToTarget);
-    }
-
-    public void setBaliseToTarget(int baliseToTarget) {
-        this.baliseToTarget = baliseToTarget;
     }
 
     public void setElapsedTimeMillis(long elapsedTimeMillis) {

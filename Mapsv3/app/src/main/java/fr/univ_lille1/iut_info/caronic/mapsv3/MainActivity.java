@@ -459,11 +459,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(MainActivity.this, "Volley error", Toast.LENGTH_SHORT).show();
+                tv.setText("Could not download the parcours");
+                Log.d(LOG , "download error : " + error.toString());
             }
         };
 
         StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, listener, errorListener);
 
+        Log.d(LOG, "download requested");
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 

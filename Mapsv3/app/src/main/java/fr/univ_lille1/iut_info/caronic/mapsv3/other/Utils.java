@@ -2,6 +2,7 @@ package fr.univ_lille1.iut_info.caronic.mapsv3.other;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import org.osmdroid.views.MapView;
 
 import java.util.ArrayList;
 
+import fr.univ_lille1.iut_info.caronic.mapsv3.R;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.CustomOverlayItem;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
@@ -134,7 +136,7 @@ public class Utils {
      * @param parcoursList
      * @return
      */
-    public static List<CustomOverlayItem> getOverlayFromParours(ParcoursList parcoursList, boolean parcoursStarted) {
+    public static List<CustomOverlayItem> getOverlayFromParours(Activity activity, ParcoursList parcoursList, boolean parcoursStarted) {
         Log.d(LOG, "converting parcours to overlay items");
 
         List<CustomOverlayItem> overlayItemsList = new ArrayList<>();
@@ -144,6 +146,16 @@ public class Utils {
                     .getPrimaryBalise()
                     .toGeoPoint();
             CustomOverlayItem item = new CustomOverlayItem(parcours.getTitle(), parcours.getDescription(), point, parcours.getId(), parcours.getPrimaryBalise().getId());
+            if ( parcours.getState() == Parcours.STATE_IS_FINISHED) {
+                item.setMarker(ContextCompat.getDrawable(activity, R.drawable.ic_beenhere_blue_500_36dp));
+                Log.d(LOG, "for primary balise, parcours is not new, setting been here");
+            } else if (parcours.getState() == Parcours.STATE_NOT_FINISHED) {
+                item.setMarker(ContextCompat.getDrawable(activity, R.drawable.ic_directions_run_blue_500_36dp));
+                Log.d(LOG, "for primary balise, parcours is not finished, setting not finished");
+            } else {
+                item.setMarker(ContextCompat.getDrawable(activity, R.drawable.ic_place_blue_500_36dp));
+                Log.d(LOG, "for primary balisen parcours is not started, setting as parcours icons");
+            }
 
             overlayItemsList.add(item);
             Log.d(LOG, "for parcours " + parcours.getId() + " added primary balise: " + point);
@@ -155,6 +167,16 @@ public class Utils {
                         Balise balise = parcours.getBaliseList().get(i);
                         point = balise.toGeoPoint();
                         item = new CustomOverlayItem(balise.getTitle(), balise.getDescription(), point, parcours.getId(), balise.getId());
+
+                        if (parcours.getState() == Parcours.STATE_IS_FINISHED) {
+                            item.setMarker(ContextCompat.getDrawable(activity, R.drawable.ic_beenhere_blue_500_36dp));
+                            Log.d(LOG, "for item at index: " + i + " setting done icon");
+                        } else {
+                            if (i != parcours.getBaliseToTargetIndex()) {
+                                item.setMarker(ContextCompat.getDrawable(activity, R.drawable.ic_beenhere_blue_500_36dp));
+                                Log.d(LOG, "for item at index: " + i + " setting done icon");
+                            }
+                        }
 
                         overlayItemsList.add(item);
                         Log.d(LOG, "for parcours " + parcours.getId() + " added target balise: " + balise.getId() + ", " + balise.getTitle());

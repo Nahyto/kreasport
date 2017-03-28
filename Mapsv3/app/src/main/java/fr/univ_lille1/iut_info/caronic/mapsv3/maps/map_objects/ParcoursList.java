@@ -40,13 +40,13 @@ public class ParcoursList {
     }
 
     public Parcours getParcoursById(int parcoursId) {
-        Log.d(LOG, "searhing for parcours: " + parcoursId);
+        //Log.d(LOG, "searhing for parcours: " + parcoursId);
         for (Parcours parcours : parcoursList) {
             if (parcours.getId() == parcoursId) {
                 return parcours;
             }
         }
-        Log.d(LOG, "did not find");
+        //Log.d(LOG, "did not find");
         return null;
     }
 
@@ -62,6 +62,8 @@ public class ParcoursList {
             }
         }
     }
+
+
 
     private boolean alreadyHaveParcours(int parcoursId) {
         for (Parcours parcours : parcoursList) {

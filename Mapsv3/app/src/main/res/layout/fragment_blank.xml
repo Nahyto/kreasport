@@ -52,6 +52,7 @@
 
         <Button
             android:text="Valider"
+            android:onClick="downloadKey"
             android:layout_height="100px"
             android:id="@+id/clebutton"
             android:layout_width="200px"

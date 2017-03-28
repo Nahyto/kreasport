@@ -72,6 +72,18 @@ public class ParcoursList {
         return false;
     }
 
+    public static ParcoursList getCustomListFromSimpleList(List<Parcours> toConvert){
+        ParcoursList newList = new ParcoursList();
+        for(Parcours parcoursToAdd : toConvert){
+            newList.addSimpleParcours(parcoursToAdd);
+        }
+        return newList;
+    }
+
+    public void addSimpleParcours(Parcours toAdd){
+        parcoursList.add(toAdd);
+    }
+
     public void addSpecificParcours(ParcoursList allRestored, int focusOnParcours) {
         Log.d(LOG, "adding specific parcours");
         if (allRestored != null) {

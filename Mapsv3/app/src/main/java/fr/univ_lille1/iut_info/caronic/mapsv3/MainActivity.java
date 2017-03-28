@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +48,9 @@ import fr.univ_lille1.iut_info.caronic.mapsv3.maps.activities.OfflineAreas;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.fragments.OSMFragment;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Balise;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.Parcours;
+import fr.univ_lille1.iut_info.caronic.mapsv3.maps.map_objects.ParcoursList;
 import fr.univ_lille1.iut_info.caronic.mapsv3.maps.other.MapOptions;
+import fr.univ_lille1.iut_info.caronic.mapsv3.other.Utils;
 import fr.univ_lille1.iut_info.caronic.mapsv3.volley.VolleySingleton;
 
 import static fr.univ_lille1.iut_info.caronic.mapsv3.R.id.nav_explore;
@@ -462,9 +465,71 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
+
+
         StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, listener, errorListener);
 
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    public void downloadKey(View view){
+
+        EditText key = (EditText) findViewById(R.id.cle);
+
+        String url = "http://51.255.131.189/v1/parcours/"+ key.getText().toString();
+
+        Log.d(LOG, "Essai de téléchargement de " + key.getText().toString());
+
+        Fragment frag = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        final TextView tv = (TextView) frag.getView().findViewById(R.id.json_text_view);
+        tv.setText("Starting download");
+
+        Response.Listener<String> listener = new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
+                if (response != null && !response.equals("")) {
+                    downloadJsonFromKey(response);
+                    displaySelectedScreen(R.id.nav_explore);
+                } else {
+                }
+            }
+        };
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Volley error", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, listener, errorListener);
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    public void downloadJsonFromKey(String downloadJsonFromKeyString){
+
+        List<Parcours> restoredList = Utils.getParcoursFromDownload(getPreferences(MODE_PRIVATE), -1);
+        Parcours downloadedFomKey = new Gson().fromJson(downloadJsonFromKeyString, Parcours.class);
+
+        if(downloadedFomKey == null)
+            return;
+
+        Log.d(LOG,"Réussi à convertir le parcours télécharger par une clé !");
+
+        if(restoredList != null){
+            for(Parcours parcourss : restoredList){
+                if(parcourss.getId() == downloadedFomKey.getId())
+                    return;
+            }
+        }
+
+        restoredList.add(downloadedFomKey);
+
+        Type typeToken = new TypeToken<ArrayList<Parcours>>(){}.getType();
+        String mergedJsonString = new Gson().toJson(restoredList, typeToken);
+
+        saveJsonParcoursToPreferences(mergedJsonString);
     }
 
     /**

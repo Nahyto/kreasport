@@ -69,7 +69,7 @@ public class Utils {
      * @param preferences
      * @return
      */
-    public static ParcoursList restoreParcoursListFromOSM(SharedPreferences preferences) {
+    public static ParcoursList restoreParcoursListFromOSM(SharedPreferences preferences, String KeyToUse) {
         String preSavedParcoursListJson = preferences.getString(KEY_PARCOURS_LIST, "");
         if (!preSavedParcoursListJson.equals("")) {
             ParcoursList list = new Gson().fromJson(preSavedParcoursListJson, ParcoursList.class);

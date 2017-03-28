@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">KreaSport</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="app_name_caps">KREASPORT</string>
+    <string name="fragment_home_button_download_from_key">Unlock race</string>
+    <string name="fragment_home_private_key_hint">Private race key (Ex: 1234-ABCD-4567)</string>
+    <string name="fragment_home_tv_no_private_key">Don\'t have a private key? Download all public races</string>
+</resources>

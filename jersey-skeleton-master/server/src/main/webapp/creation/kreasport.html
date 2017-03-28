@@ -170,17 +170,15 @@
 	Fonction qui envoie au server les balises et le parcours
 	*/
 	function sendToServ(){
-	    
-      //  for(var i=0 ; i<tabBalise.length ; i++){
-	//post un parcours
-    	    $.ajax({
+		$.ajax({
     	        // The URL for the request
-    	        url: "/v1/balise",
+    	        url: "/v1/parcours",
                 headers: { 'Content-Type': 'application/json' },
     	        // The data to send (will be converted to a query string)
                 
                     data: JSON.stringify({
-                    'latitude' : 1.25
+                    'name' : 'nom'
+                    
                 }),
                 
     	        
@@ -192,7 +190,7 @@
     	        // Code to run if the request succeeds;
     	        // the response is passed to the function
     	        success: function( json ) {
-                    console.log(tabBalise[0].latLng.toString());
+    	        	
     	            alert("success");
     	        },
     	        // Code to run if the request fails; the raw request and
@@ -209,7 +207,57 @@
     	            alert( "The request is complete!" );
     	        }
     	    });
-       // }
+		
+	    
+     for(var i=0 ; i<tabBalise.length ; i++){
+     				var test = tabBalise[i].marker.getPosition().toString()
+    	        	var coordlat = test.substring(0, test.indexOf(','));
+    	        	console.log(coordlat.substring(1));
+    	        	var coordlng = test.substring(test.lastIndexOf(' ')+1);
+    	        	var clat = parseFloat(coordlat.substring(1));
+    	        	var clng = parseFloat(coordlng.substring(coordlng.lastIndexOf(' ')+1));
+    	        	console.log(coordlng.substring(0,coordlng.length-1));
+	//post un parcours
+    	    $.ajax({
+    	        // The URL for the request
+    	        url: "/v1/balise",
+                headers: { 'Content-Type': 'application/json' },
+    	        // The data to send (will be converted to a query string)
+                
+                    data: JSON.stringify({
+                    'latitude' : clat,
+                    'longitude' : clng
+                    
+                }),
+                
+    	        
+    	        //data: "longitude=" 
+    	        // Whether this is a POST/GET/UPDATE/DELETE request
+    	        type: "POST",
+    	        // The type of data we expect back
+    	        dataType : "json",
+    	        // Code to run if the request succeeds;
+    	        // the response is passed to the function
+    	        success: function( json ) {
+    	        	console.log(""+clat);
+                    console.log(tabBalise[0].marker.getPosition().toString());
+    	            alert("success");
+    	        },
+    	        // Code to run if the request fails; the raw request and
+    	        // status codes are passed to the function
+    	        error: function( xhr, status, errorThrown ) {
+    	            alert( "Sorry, there was a problem!" );
+    	            console.log( "Error: " + errorThrown );
+    	            console.log( "Status: " + status );
+    	            console.dir( xhr );
+    	        },
+    	        
+    	        // Code to run regardless of success or failure
+    	        complete: function( xhr, status ) {
+    	            alert( "The request is complete!" );
+    	        }
+    	    });
+        }
    
 
 

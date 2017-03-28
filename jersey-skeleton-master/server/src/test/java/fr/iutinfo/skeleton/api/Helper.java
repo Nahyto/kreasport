@@ -22,7 +22,8 @@ public class Helper {
         dao.createUserTable();
         daoP.createParcoursTable();
         daoB.createBaliseTable();
-        
+
+        dao.insert(new User(1, "Franck", "admin", "admin"));
     }
 
     static User createUserWithName(String name) {
@@ -31,7 +32,7 @@ public class Helper {
     }
 
     static User createUserWithAlias(String name, String alias) {
-        User user = new User(0, name, alias);
+        User user = new User(0, name, alias, "");
         return createUser(user);
     }
 

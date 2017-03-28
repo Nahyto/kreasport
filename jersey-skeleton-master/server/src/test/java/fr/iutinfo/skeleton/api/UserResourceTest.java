@@ -70,7 +70,7 @@ public class UserResourceTest extends JerseyTest {
         User user = new User(0, "thomas");
         Entity<User> userEntity = Entity.entity(user, MediaType.APPLICATION_JSON);
         String json = target(PATH).request().post(userEntity).readEntity(String.class);
-        assertEquals("{\"id\":1,\"name\":\"thomas\"", json.substring(0, 23));
+        assertEquals("{\"id\":2,\"name\":\"thomas\"", json.substring(0, 23));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class UserResourceTest extends JerseyTest {
         createUserWithName("foo");
         createUserWithName("bar");
         List<UserDto> users = target(PATH + "/").request().get(listUserResponseType);
-        assertEquals(2, users.size());
+        assertEquals(3, users.size());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class UserResourceTest extends JerseyTest {
         createUserWithName("foo");
         createUserWithName("bar");
         List<UserDto> users = target(PATH + "/").request().get(listUserResponseType);
-        assertEquals("foo", users.get(0).getName());
+        assertEquals("Franck", users.get(0).getName());
     }
 
     @Test

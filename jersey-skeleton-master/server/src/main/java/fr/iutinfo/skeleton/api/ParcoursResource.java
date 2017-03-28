@@ -80,6 +80,17 @@ public class ParcoursResource {
         }
         return user.convertToDto();
     }
+    @GET
+    @Path("/id/{name}")
+    public int getParcoursName(@PathParam("name")String name) {
+       return dao.getIdByName(name);
+    }
+    
+    @GET
+    @Path("/key/{key}")
+    public Parcours getKey(@PathParam("key") String key){
+    	return dao.parcoursById(key);
+    }
     
 
     @GET
@@ -89,7 +100,6 @@ public class ParcoursResource {
 			parcoursList = dao.all();
 			for (Parcours parcours : parcoursList) {
 				parcours.setBaliseList(daoBalise.allFromParcours(parcours.getId()));
-				System.out.println(dao.keyById(1));
 			}
         } else {
             logger.debug("Search users with query: " + query);

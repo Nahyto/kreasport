@@ -1,68 +1,86 @@
-<!DOCTYPE html>
-<html lang="fr">
+
+<html>
 <head>
-    <title>Kréa'sport</title>
-    <meta charset='utf-8'>
-    <!-- jQuery -->
-    <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+<meta charset="UTF-8">
+<title>Krea'Sport - Page Authentification</title>
 
-    <!-- bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 
-    <!-- Code local -->
-    <script src="all.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
+<script src='js/jquery-2.1.3.js' />
+<script>
+    $(document).ready(function() {
+    	
+    }); // end document.ready
+</script>
+
+
 </head>
+
 <body>
-<nav class="navbar navbar-default">
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Javascript (Single Page Application)</a></li>
-            <li><a href="/html/user">User</a></li>
-            <li><a href="/html/parcours">Parcours</a></li>
-        </ul>
-    </div>
-</nav>
+	<div id="wrap">
+		<div id="regbar">
+			<div id="navthing">
+				<h2>
+					<a href="#" id="loginform">Login</a>
+				</h2>
+				<div class="login">
+					<div class="arrow-up"></div>
+					<div class="formholder">
+						<div class="randompad">
+							<fieldset>
+								<label name="login">Login</label> <input type="email" id="pseudo"/> 
+								<label
+									name="passwordJS">Password</label> <input type="password" id="mdp"/> <input
+									 type="submit" value="Login" id="boutonAuthen" />
+								<script>
+  
+								$('#boutonAuthen').click(function (event) {
 
-<div class="container">
-    <div class="row">
+  										$.ajax({
+								    	// The URL for the request
+								    	url: "/v1/secure/who",
+								    	// The data to send (will be converted to a query string)
+								    	//data:"{}",
+								    	// Whether this is a POST/GET/UPDATE/DELETE request
+								    	type: "GET",
+								    	// The type of data we expect back
+								    	dataType : "json",
+									    // Code to run if the request succeeds;
+									    // the response is passed to the function
+									    beforeSend : function(req) {
+        									req.setRequestHeader("Authorization", "Basic " + btoa($("#pseudo").val() + ":" + $("#mdp").val()));
+       									},
+									    success: function( data ) {
+									    	
+									    	if(data.id != -1 && data.alias == 'admin'){
+									    		 document.location.href="creation/kreasport.html"; 
+									    	}else{
+									    		console.log('tu peux pas mdr');
+									    	}
+									    	
+									    	
+									    },
+									   error: function(xhr, textStatus, errorThrown){
+	       									alert(''+errorThrown);
+	    								}
+									  
+										});
+	    								
+									});
+								
+  </script>
 
-        <div class="col-md-6">
-            <h1>S'identifier :</h1>
-            <input type="text" name="userlogin" id="userlogin" placeholder="Login" class="form-control"/>
-            <input type="password" name="user" id="passwdlogin" placeholder="Password" class="form-control"/>
-            <br/>
-            <button id="read-forall" class="btn btn-default">Lire /v1/secure/who</button>
-            <br/>
-            <button id="read-byannotation" class="btn btn-default">Lire /v1/secure/byannotation</button>
-        </div>
-    </div>
-    <div class="row" style="margin-top: 20px;">
-    </div>
-    <div class="row" style="margin-top: 1em;">
-        <div class="panel panel-info">
-            <div class="panel-heading">Réponse</div>
-            <div class="panel-body" id="reponse">
-            </div>
-        </div>
-    </div>
-    <script type="text/javascript">
-			$(document).ready(function() {
-				$("#get-ram").click(function () {getUser($('#user').val(), $('#alias').val())});
-				$("#post-ram").click(function () {postUser($('#user').val(), $('#alias').val())});
-				$("#list-ram").click(function () {listUsers()});
-				$("#get-bdd").click(function () {getUserBdd($('#userdb').val(), $('#aliasdb').val())});
-				$("#post-bdd").click(function () {postUserBdd(
-				    $('#userdb').val(),
-				    $('#aliasdb').val(),
-				    $('#emaildb').val(),
-				    $('#passwddb').val())});
-				$("#list-bdd").click(function () {listUsersBdd()});
-				$("#read-forall").click(function () {getForAll()});
-				$("#read-byannotation").click(function () {getByAnnotation()});
-			});
+							</fieldset>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script
+		src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
 
-    </script>
+	<script src="js/index.js"></script>
 </body>
 </html>

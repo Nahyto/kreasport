@@ -36,9 +36,13 @@ public interface ParcoursDao {
     @RegisterMapperFactory(BeanMapperFactory.class)
     List<Parcours> all();
     
-    @SqlQuery("select key from parcours where id = :id")
+    @SqlQuery("select * from parcours where key = :key")
     @RegisterMapperFactory(BeanMapperFactory.class)
-    String keyById(@Bind("id")int id);
+    Parcours parcoursById(@Bind("key")String key);
+    
+    @SqlQuery("select id from parcours where name = :name")
+    @RegisterMapperFactory(BeanMapperFactory.class)
+    int getIdByName(@Bind("name")String name);
 
 	@SqlQuery("select * from parcours INNER JOIN balise ON parcours.id = balise.parcours ORDER BY parcours.id")
 	@RegisterMapperFactory(BeanMapperFactory.class)

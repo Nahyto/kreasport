@@ -82,7 +82,7 @@ public class ParcoursResource {
     }
     @GET
     @Path("/id/{name}")
-    public int getParcoursName(@PathParam("name")String name) {
+    public Parcours getParcoursName(@PathParam("name")String name) {
        return dao.getIdByName(name);
     }
     

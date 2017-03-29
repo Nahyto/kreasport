@@ -12,9 +12,13 @@
 
 
     <string name="app_name_caps">KREASPORT</string>
+
+    <!--FRAGMENT HOME-->
     <string name="fragment_home_button_download_from_key">Unlock race</string>
     <string name="fragment_home_private_key_hint">Private race key (Ex: 1234-ABCD-4567)</string>
     <string name="fragment_home_tv_no_private_key">Don\'t have a private key? Download all public races</string>
+
+    <!--MainAcitivy Downloads-->
     <string name="public_races_url">http://51.255.131.189/v1/parcours/</string>
     <string name="private_race_url">http://51.255.131.189/v1/parcours/%s</string>
     <string name="download_fail_title">Download failed</string>
@@ -23,4 +27,19 @@
     <string name="download_public_race_message">Downloading public races…</string>
     <string name="no_race_found_public">There are no public races available</string>
     <string name="no_race_found_private">There is no race associated with this key</string>
+
+
+    <!--Welcome screens-->
+    <string name="title_activity_welcome">Home Screen</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+    <string name="slide_1_title">Explore your surroundings</string>
+    <string name="slide_1_desc">Choose your own path with public races available to everyone or get a key to unlock a private race</string>
+    <string name="slide_2_title">Competitive rankings</string>
+    <string name="slide_2_desc">Race in competitive mode and compare your times with others</string>
+    <string name="slide_3_title">Offline maps</string>
+    <string name="slide_3_desc">Download maps beforehand so you don\'t have to worry about your mobile data usage</string>
+    <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
+    <string name="play_again">Play Again</string>
 </resources>

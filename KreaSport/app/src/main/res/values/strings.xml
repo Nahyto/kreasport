@@ -40,6 +40,13 @@
     <string name="slide_2_desc">Race in competitive mode and compare your times with others</string>
     <string name="slide_3_title">Offline maps</string>
     <string name="slide_3_desc">Download maps beforehand so you don\'t have to worry about your mobile data usage</string>
+    <string name="slide_4_title">Grant write access</string>
+    <string name="slide_4_desc">We need to be able to have somewhere to store the maps (even temporarily)</string>
+    <string name="slide_5_title">Grant location access</string>
+    <string name="slide_5_desc">We need to access your location to verify you have reached a control point</string>
+    <string name="slide_6_title">Ready to go!</string>
+    <string name="slide_6_desc">The setup is finished. Go smash those leaderboards!</string>
     <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
     <string name="play_again">Play Again</string>
+    <string name="grant">GRANT</string>
 </resources>

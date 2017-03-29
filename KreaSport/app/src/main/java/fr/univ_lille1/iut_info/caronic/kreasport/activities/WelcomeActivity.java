@@ -2,8 +2,10 @@ package fr.univ_lille1.iut_info.caronic.kreasport.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -17,19 +19,23 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import fr.univ_lille1.iut_info.caronic.kreasport.MainActivity;
 import fr.univ_lille1.iut_info.caronic.kreasport.R;
+import fr.univ_lille1.iut_info.caronic.kreasport.other.CustomViewPager;
+import fr.univ_lille1.iut_info.caronic.kreasport.other.PermissionsManager;
 import fr.univ_lille1.iut_info.caronic.kreasport.other.PreferenceManager;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private ViewPager viewPager;
+    private CustomViewPager viewPager;
     private MyViewPagerAdapter myViewPagerAdapter;
     private LinearLayout dotsLayout;
     private TextView[] dots;
     private int[] layouts;
     private Button btnSkip, btnNext;
     private PreferenceManager prefManager;
+    private PermissionsManager permissionsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         // Checking for first time launch - before calling setContentView()
         prefManager = new PreferenceManager(this);
+        permissionsManager = new PermissionsManager(this);
         if (!prefManager.isFirstTimeLaunch()) {
             launchHomeScreen();
             finish();
@@ -49,7 +56,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_welcome);
 
-        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        viewPager = (CustomViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         btnSkip = (Button) findViewById(R.id.btn_skip);
         btnNext = (Button) findViewById(R.id.btn_next);
@@ -59,7 +66,10 @@ public class WelcomeActivity extends AppCompatActivity {
         layouts = new int[]{
                 R.layout.slide_screen1,
                 R.layout.slide_screen2,
-                R.layout.slide_screen3};
+                R.layout.slide_screen3,
+                R.layout.slide_screen4,
+                R.layout.slide_screen5,
+                R.layout.slide_screen6};
 
         // adding bottom dots
         addBottomDots(0);
@@ -74,7 +84,9 @@ public class WelcomeActivity extends AppCompatActivity {
         btnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchHomeScreen();
+//                launchHomeScreen();
+//                Go to first permission request screen
+                viewPager.setCurrentItem(layouts.length - 2);
             }
         });
 
@@ -82,12 +94,24 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // checking for last page
-                // if last page home screen will be launched
-                int current = getItem(+1);
-                if (current < layouts.length) {
+                // if second to last or last, will ask for permission
+                int current = getItem(0);
+                if (current < layouts.length - 3) {
                     // move to next screen
-                    viewPager.setCurrentItem(current);
-                } else {
+                    viewPager.setCurrentItem(current + 1);
+                } else if (current == layouts.length - 3) {
+                    boolean granted = permissionsManager.isPermissionGranted(PermissionsManager.WRITE_EXTERNAL_STORAGE);
+                    if (!granted)
+                        permissionsManager.requestPermission(PermissionsManager.WRITE_EXTERNAL_STORAGE);
+                    else
+                        viewPager.setCurrentItem(current + 1);
+                } else if (current == layouts.length - 2) {
+                    boolean granted = permissionsManager.isPermissionGranted(PermissionsManager.ACCESS_FINE_LOCATION);
+                    if (!granted)
+                        permissionsManager.requestPermission(PermissionsManager.ACCESS_FINE_LOCATION);
+                    else
+                        viewPager.setCurrentItem(current + 1);
+                } else if (current == layouts.length - 1) {
                     launchHomeScreen();
                 }
             }
@@ -130,11 +154,28 @@ public class WelcomeActivity extends AppCompatActivity {
         public void onPageSelected(int position) {
             addBottomDots(position);
 
-            // changing the next button text 'NEXT' / 'GOT IT'
             if (position == layouts.length - 1) {
-                // last page. make button text to GOT IT
                 btnNext.setText(getString(R.string.start));
+            } else if (position == layouts.length - 2) {
                 btnSkip.setVisibility(View.GONE);
+                boolean granted = permissionsManager.isPermissionGranted(PermissionsManager.ACCESS_FINE_LOCATION);
+                if (!granted) {
+                    btnNext.setText(getString(R.string.grant));
+                    viewPager.setPagingEnabled(false);
+                } else {
+                    btnNext.setText(getString(R.string.next));
+                    viewPager.setPagingEnabled(true);
+                }
+            } else if (position == layouts.length - 3) {
+                btnSkip.setVisibility(View.GONE);
+                boolean granted = permissionsManager.isPermissionGranted(PermissionsManager.WRITE_EXTERNAL_STORAGE);
+                if (!granted) {
+                    btnNext.setText(getString(R.string.grant));
+                    viewPager.setPagingEnabled(false);
+                } else {
+                    btnNext.setText(getString(R.string.next));
+                    viewPager.setPagingEnabled(true);
+                }
             } else {
                 // still pages are left
                 btnNext.setText(getString(R.string.next));
@@ -196,5 +237,30 @@ public class WelcomeActivity extends AppCompatActivity {
             View view = (View) object;
             container.removeView(view);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PermissionsManager.ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onPermissionGranted();
+                }
+            }
+            case PermissionsManager.WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onPermissionGranted();
+                }
+            }
+        }
+    }
+
+    public void onPermissionGranted() {
+        viewPager.setPagingEnabled(true);
+        btnNext.setText(getString(R.string.next));
     }
 }

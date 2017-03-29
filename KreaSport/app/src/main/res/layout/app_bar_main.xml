@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="fr.univ_lille1.iut_info.caronic.kreasport.MainActivity">
+    tools:activity="fr.univ_lille1.iut_info.caronic.kreasport.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

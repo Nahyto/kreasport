@@ -1,15 +1,15 @@
 package fr.univ_lille1.iut_info.caronic.kreasport.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.BindView;
@@ -18,7 +18,14 @@ import butterknife.OnClick;
 import fr.univ_lille1.iut_info.caronic.kreasport.MainActivity;
 import fr.univ_lille1.iut_info.caronic.kreasport.R;
 
-public class HomeFragment extends Fragment implements OnFragmentInteractionListener {
+public class HomeFragment extends Fragment {
+
+    private static final String LOG = HomeFragment.class.getSimpleName();
+
+    public static final String DOWNLOAD_REQUEST = "kreasport.fragment_home.request.reason";
+
+    public static final String DOWNLOAD_PRIVATE_RACE = "kreasport.frag_request_code.download_private_race";
+    public static final String DOWNLOAD_PRIVATE_RACE_KEY = "kreasport.frag_request_code.download_private_race_key";
 
 
     @BindView(R.id.fragment_home_et_key)
@@ -26,9 +33,12 @@ public class HomeFragment extends Fragment implements OnFragmentInteractionListe
 
     @OnClick(R.id.fragment_home_tv_download_public_races)
     public void downloadPublicRaces() {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(MainActivity.DOWNLOAD_PUBLIC_RACES);
-        }
+        downloadRace(false);
+    }
+
+    @OnClick(R.id.fragment_home_button_download_from_key)
+    public void downloadPrivateRace() {
+        downloadRace(true);
     }
 
 
@@ -82,12 +92,24 @@ public class HomeFragment extends Fragment implements OnFragmentInteractionListe
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    private void downloadRace(boolean privateRace) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri.toString());
+            Intent intent = new Intent();
+            intent.putExtra(MainActivity.CALLBACK_KEY, DOWNLOAD_REQUEST);
+
+            if (privateRace) {
+                intent.putExtra(DOWNLOAD_PRIVATE_RACE, true);
+                intent.putExtra(DOWNLOAD_PRIVATE_RACE_KEY, etKey.getText().toString());
+            } else {
+                intent.putExtra(DOWNLOAD_PRIVATE_RACE, false);
+            }
+
+            mListener.onFragmentInteraction(intent);
+        } else {
+            Log.d(LOG, "could not send download request as mListener was null");
         }
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -104,10 +126,5 @@ public class HomeFragment extends Fragment implements OnFragmentInteractionListe
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onFragmentInteraction(String origin) {
-
     }
 }

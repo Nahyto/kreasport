@@ -1,5 +1,6 @@
 package fr.univ_lille1.iut_info.caronic.kreasport.fragments;
 
+import android.content.Intent;
 import android.net.Uri;
 
 /**
@@ -8,5 +9,5 @@ import android.net.Uri;
 
 public interface OnFragmentInteractionListener {
     // TODO: Update argument type and name
-    void onFragmentInteraction(String origin);
+    void onFragmentInteraction(Intent requestIntent);
 }

@@ -15,8 +15,12 @@
     <string name="fragment_home_button_download_from_key">Unlock race</string>
     <string name="fragment_home_private_key_hint">Private race key (Ex: 1234-ABCD-4567)</string>
     <string name="fragment_home_tv_no_private_key">Don\'t have a private key? Download all public races</string>
-    <string name="public_races_url">http://51.255.131.189/v1/parcours</string>
+    <string name="public_races_url">http://51.255.131.189/v1/parcours/</string>
+    <string name="private_race_url">http://51.255.131.189/v1/parcours/%s</string>
     <string name="download_fail_title">Download failed</string>
     <string name="download_fail_description">Could not connect to the server</string>
-    <string name="download_message">Downloading races...</string>
+    <string name="download_private_race_message">Downloading private race…</string>
+    <string name="download_public_race_message">Downloading public races…</string>
+    <string name="no_race_found_public">There are no public races available</string>
+    <string name="no_race_found_private">There is no race associated with this key</string>
 </resources>

@@ -1,6 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.kreasport.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
@@ -9,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,7 +24,7 @@ import fr.univ_lille1.iut_info.caronic.kreasport.R;
  * Use the {@link BottomSheet#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BottomSheet extends Fragment implements OnFragmentInteractionListener {
+public class BottomSheet extends Fragment {
 
 
     private BottomSheetBehavior mBottomSheetBehaviour;
@@ -96,13 +96,6 @@ public class BottomSheet extends Fragment implements OnFragmentInteractionListen
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri.toString());
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -120,8 +113,4 @@ public class BottomSheet extends Fragment implements OnFragmentInteractionListen
         mListener = null;
     }
 
-    @Override
-    public void onFragmentInteraction(String origin) {
-
-    }
 }

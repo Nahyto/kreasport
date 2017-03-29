@@ -2,9 +2,10 @@ package fr.univ_lille1.iut_info.caronic.kreasport;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String LOG = MainActivity.class.getSimpleName();
 
-    public static final String DOWNLOAD_PUBLIC_RACES = "kreasport.frag_request_code.download_public_races";
+    public static final String CALLBACK_KEY = "kreasport.frag_request.reason";
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity
     private void hideKeyboard() {
         View view = this.getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Sets the menuItem to be checked and changes the title
+     *
      * @param menuItem
      */
     private void completeDrawerAction(MenuItem menuItem) {
@@ -195,27 +196,64 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(String request) {
+    public void onFragmentInteraction(Intent requestIntent) {
+        if (requestIntent == null) {
+            throw new NullPointerException("Request intent should not be null");
+        }
+
+        String request = requestIntent.getStringExtra(CALLBACK_KEY);
+        if (request == null) {
+            return;
+        }
+
         switch (request) {
-            case DOWNLOAD_PUBLIC_RACES:
-                downloadPublicRaces();
-                break;
+            case HomeFragment.DOWNLOAD_REQUEST:
+                downloadRace(requestIntent);
             default:
                 break;
         }
     }
 
-    private void downloadPublicRaces() {
+    /**
+     * Unpacks the intent, sets up ProgressDialog, creates StringRequest and adds it to {@link VolleySingleton}'s queue.
+     * @param intent
+     */
+    private void downloadRace(Intent intent) {
 
-        final ProgressDialog progressDialog = new ProgressDialog(this, R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage(getString(R.string.download_message));
-        progressDialog.setCancelable(false);
+        final boolean requestPrivate = intent.getBooleanExtra(HomeFragment.DOWNLOAD_PRIVATE_RACE, false);
+        String key = intent.getStringExtra(HomeFragment.DOWNLOAD_PRIVATE_RACE_KEY);
+
+        if (requestPrivate && (key == null || key.isEmpty())) {
+            Log.d(LOG, "received private download request but key was empty");
+            return;
+        }
+
+        // TODO validate key format for private race before download
+
+        String url;
+        if (requestPrivate)
+            url = getString(R.string.public_races_url);
+        else
+            url = getString(R.string.private_race_url, key);
+
+        final ProgressDialog progressDialog = createDownloadProgressDialog(requestPrivate);
         progressDialog.show();
 
-        String url = getString(R.string.public_races_url);
+        StringRequest stringRequest = createDownloadRequest(url, requestPrivate, progressDialog);
 
-        StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+        Log.d(LOG, "sending volley request for " + (requestPrivate ? "private race" : "public races"));
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    /**
+     *
+     * @param url the target url which will give the race
+     * @param requestPrivate is the request is a private race
+     * @param progressDialog the ProgressDialog to dismiss on response/error
+     * @return creates a request for a string download
+     */
+    private StringRequest createDownloadRequest(final String url, final boolean requestPrivate, final ProgressDialog progressDialog) {
+        return new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
@@ -226,23 +264,54 @@ public class MainActivity extends AppCompatActivity
 
                 } else {
                     progressDialog.dismiss();
+                    showNoRaceFoundDialog(false, requestPrivate);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(R.string.download_fail_title)
-                        .setMessage(R.string.download_fail_description)
-                        .setPositiveButton("OK", null)
-                        .create()
-                        .show();
-                Log.d(LOG , "download error : " + error.toString());
+                showNoRaceFoundDialog(true, requestPrivate);
+                Log.d(LOG, "download error : " + error.toString());
             }
         });
-
-        Log.d(LOG, "download requested");
-        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
+
+    /**
+     * Creates and show an AlertDialog for no race(s) found and gives the reason (none found/connection error)
+     * @param connectionError if the reason is a connection error
+     * @param requestPrivate if the request was for a private race
+     */
+    private void showNoRaceFoundDialog(boolean connectionError, boolean requestPrivate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.download_fail_title))
+                .setPositiveButton("OK", null);
+
+        if (!connectionError && requestPrivate) {
+            builder.setMessage(R.string.no_race_found_private);
+        } else if (!connectionError && !requestPrivate){
+            builder.setMessage(R.string.no_race_found_public);
+        } else {
+            builder.setMessage(R.string.download_fail_description);
+        }
+        builder.show();
+    }
+
+    /**
+     *
+     * @param requestPrivate if the race being downloaded is a private race
+     * @return a {@link ProgressDialog} in accordance to which race(s) is being downloaded
+     */
+    private ProgressDialog createDownloadProgressDialog(boolean requestPrivate) {
+        ProgressDialog progressDialog = new ProgressDialog(this, R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        if (requestPrivate) {
+            progressDialog.setMessage(getString(R.string.download_private_race_message));
+        } else {
+            progressDialog.setMessage(getString(R.string.download_public_race_message));
+        }
+        return progressDialog;
+    }
+
 }

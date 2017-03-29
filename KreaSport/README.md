@@ -4,6 +4,46 @@ KreaSport
 
 ----------
 
+## TODO ##
+
+ - **MainActivity**
+	 - Permissions
+		 - custom frag/activity
+		 - request + request receiver
+	 - Transfer downloaded races to `ExploreFragment`
+ - **HomeFragment**
+	 - Check key format before download
+ - **ExploreFragment**
+	 - Everything:
+		 - Map
+		 - CustomIconOverlay
+			 - Custom icons
+			 - Proper adding w/o reloading
+		 - Save state
+		 - Callbacks for interaction w/ `BottomSheetFragment`
+ - **OfflineAreaActivity**
+	 - Everything:
+		 - Activity Layout
+		 - Map
+		 - Overlay
+			 - Size estimation
+		 - Aysnc download
+			 - Notification w/ stop
+		 - ArrayAdapter & Model
+		 - Acitivity for downloaded areas
+## DONE ##
+ - **MainActivity**
+	 - Navigation drawer
+		 - Switch fragments
+		 - Save fragment state
+		 - Backstack
+	 - Callback for downloads from `HomeFragment`
+ - **HomeFragment**
+	 - Layout
+		 - Text & buttons
+
+----------
+
 
 Project description
 -------------------

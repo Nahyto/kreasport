@@ -1,6 +1,7 @@
 package fr.univ_lille1.iut_info.caronic.kreasport.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,7 +19,7 @@ import fr.univ_lille1.iut_info.caronic.kreasport.R;
  * Use the {@link ExploreFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ExploreFragment extends Fragment implements OnFragmentInteractionListener{
+public class ExploreFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -68,13 +69,6 @@ public class ExploreFragment extends Fragment implements OnFragmentInteractionLi
         return inflater.inflate(R.layout.fragment_explore, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri.toString());
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -90,10 +84,5 @@ public class ExploreFragment extends Fragment implements OnFragmentInteractionLi
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onFragmentInteraction(String origin) {
-
     }
 }

@@ -15,7 +15,7 @@
 
     <!--FRAGMENT HOME-->
     <string name="fragment_home_button_download_from_key">Unlock race</string>
-    <string name="fragment_home_private_key_hint">Private race key (Ex: 1234-ABCD-4567)</string>
+    <string name="fragment_home_private_key_hint">Private race key</string>
     <string name="fragment_home_tv_no_private_key">Don\'t have a private key? Download all public races</string>
 
     <!--MainAcitivy Downloads-->

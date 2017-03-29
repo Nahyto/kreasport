@@ -1,5 +1,6 @@
 package fr.univ_lille1.iut_info.caronic.kreasport;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,7 +17,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,11 +31,15 @@ import fr.univ_lille1.iut_info.caronic.kreasport.fragments.BottomSheet;
 import fr.univ_lille1.iut_info.caronic.kreasport.fragments.ExploreFragment;
 import fr.univ_lille1.iut_info.caronic.kreasport.fragments.HomeFragment;
 import fr.univ_lille1.iut_info.caronic.kreasport.fragments.OnFragmentInteractionListener;
+import fr.univ_lille1.iut_info.caronic.kreasport.volley.VolleySingleton;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
 
     private static final String LOG = MainActivity.class.getSimpleName();
+
+    public static final String DOWNLOAD_PUBLIC_RACES = "kreasport.frag_request_code.download_public_races";
+
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
 
@@ -172,6 +184,10 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
+    /**
+     * Sets the menuItem to be checked and changes the title
+     * @param menuItem
+     */
     private void completeDrawerAction(MenuItem menuItem) {
         menuItem.setChecked(true);
 
@@ -179,7 +195,54 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(String origin) {
-        Toast.makeText(this, "used callback from " + origin, Toast.LENGTH_SHORT).show();
+    public void onFragmentInteraction(String request) {
+        switch (request) {
+            case DOWNLOAD_PUBLIC_RACES:
+                downloadPublicRaces();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void downloadPublicRaces() {
+
+        final ProgressDialog progressDialog = new ProgressDialog(this, R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(getString(R.string.download_message));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        String url = getString(R.string.public_races_url);
+
+        StringRequest stringRequest  = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
+                if (response != null && !response.equals("")) {
+                    progressDialog.dismiss();
+
+                    // TODO save json and transfer to ExploreFragment
+
+                } else {
+                    progressDialog.dismiss();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(R.string.download_fail_title)
+                        .setMessage(R.string.download_fail_description)
+                        .setPositiveButton("OK", null)
+                        .create()
+                        .show();
+                Log.d(LOG , "download error : " + error.toString());
+            }
+        });
+
+        Log.d(LOG, "download requested");
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 }

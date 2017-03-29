@@ -9,10 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import fr.univ_lille1.iut_info.caronic.kreasport.MainActivity;
 import fr.univ_lille1.iut_info.caronic.kreasport.R;
 
 public class HomeFragment extends Fragment implements OnFragmentInteractionListener {
@@ -20,6 +23,13 @@ public class HomeFragment extends Fragment implements OnFragmentInteractionListe
 
     @BindView(R.id.fragment_home_et_key)
     EditText etKey;
+
+    @OnClick(R.id.fragment_home_tv_download_public_races)
+    public void downloadPublicRaces() {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(MainActivity.DOWNLOAD_PUBLIC_RACES);
+        }
+    }
 
 
     // TODO: Rename parameter arguments, choose names that match

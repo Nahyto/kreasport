@@ -22,10 +22,10 @@
         android:gravity="center">
 
         <ImageView
-            android:src="@drawable/ic_kreasport_logo_no_bg"
-            android:layout_gravity="center_horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_kreasport_logo_no_bg"/>
 
 
     </LinearLayout>
@@ -49,8 +49,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textSize="18sp"
-                android:hint="@string/fragment_home_private_key_hint"/>
+                android:hint="@string/fragment_home_private_key_hint"
+                android:textSize="18sp"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -71,14 +71,6 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:gravity="center">
-
-        <!--<Button-->
-        <!--android:id="@+id/fragment_home_button_download_public"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:shadowColor="@color/colorPrimaryDark"-->
-        <!--android:textColor="@color/white"-->
-        <!--android:text="@string/fragment_home_button_download_public"/>-->
 
         <TextView
             android:id="@+id/fragment_home_tv_download_public_races"

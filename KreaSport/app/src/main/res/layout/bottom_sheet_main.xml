@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="80dp"
+              android:orientation="horizontal"
+              android:paddingBottom="10dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/bottom_sheet_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="Peek"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"/>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/bottom_sheet_title">
+
+            <TextView
+                android:id="@+id/bottom_sheet_difficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:text="Difficulty:"
+                android:textColor="@android:color/black"
+                android:paddingEnd="10dp"
+                android:textSize="13sp"
+                android:paddingRight="10dp"/>
+
+            <RatingBar
+                android:theme="@style/RatingBar"
+                android:id="@+id/bottom_sheet_ratingBar"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/bottom_sheet_difficulty"
+                android:layout_toRightOf="@+id/bottom_sheet_difficulty"
+                android:numStars="5"
+                android:rating="3.5"
+                android:stepSize="0.5"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+</LinearLayout>
